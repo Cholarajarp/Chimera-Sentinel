@@ -1,0 +1,19 @@
+# Sentinel CLI Configuration
+[cli]
+# Default output format
+output_format = "json"  # options: "json", "yaml", "table"
+
+[attestation_verify]
+# Default tenant for verification
+default_tenant = "00000000-0000-0000-0000-000000000001"
+# Default environment
+default_environment = "production"
+
+[google_cloud]
+use_live_services = false
+kms_key_resource = "projects/sentinel-prod/locations/us-central1/keyRings/sentinel-ring/cryptoKeys/attestation-signer"
+kms_key_version = "1"
+
+[observability]
+log_level = "warn"
+log_format = "json"

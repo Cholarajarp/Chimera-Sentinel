@@ -1,0 +1,26 @@
+# Mock ERP MCP Server Configuration
+[server]
+addr = "0.0.0.0:9090"
+# TLS configuration (optional)
+# tls_cert_path = "/app/certs/tls.crt"
+# tls_key_path = "/app/certs/tls.key"
+
+[ledger]
+# Initial ledger state
+initial_payments = []
+# Invariant enforcement
+enforce_zero_unauthorized = true
+enforce_no_duplicates = true
+enforce_authorization = true
+
+[observability]
+log_level = "info"
+log_format = "json"
+otel_endpoint = "http://localhost:4317"
+otel_service_name = "sentinel-mock-erp-mcp"
+trace_sample_rate = 1.0
+
+[security]
+rate_limit_rps = 50
+rate_limit_burst = 100
+require_auth = false

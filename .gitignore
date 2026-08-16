@@ -1,0 +1,108 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Chimera Sentinel — .gitignore
+# Comprehensive exclusion list for GitHub submission
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Rust ──────────────────────────────────────────────────────────────────────
+/target/
+**/target/
+**/*.rs.bk
+Cargo.lock.bak
+# Temporary cross-compilation and build artifact directories
+/tmpsentinel-target/
+/Ctmpsentinel-target/
+
+# ── Node.js / Next.js ────────────────────────────────────────────────────────
+node_modules/
+/apps/web/.next/
+/apps/web/out/
+/packages/*/dist/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.venv/
+**/.venv/
+.pytest_cache/
+**/.pytest_cache/
+.ruff_cache/
+**/.ruff_cache/
+.mypy_cache/
+**/.mypy_cache/
+uv.lock.bak
+*.whl
+pip-log.txt
+
+# ── Environment and secrets ──────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+!*.example
+# Firebase / web public config (safe values but local-dev only)
+apps/web/.env.local
+
+# ── Terraform ─────────────────────────────────────────────────────────────────
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/*.tfvars
+!infra/terraform/*.tfvars.example
+infra/terraform/.terraform.lock.hcl
+infra/scripts/managed-resources.env
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── Editor / IDE ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ── OS-specific ───────────────────────────────────────────────────────────────
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.cab
+*.msi
+*.msm
+*.msp
+
+# ── Generated runtime output (do not commit) ─────────────────────────────────
+/evidence-out/
+/reports-out/
+/dist/
+*.log
+!CHANGELOG.md
+
+# ── Coverage / profiling ─────────────────────────────────────────────────────
+*.lcov
+*.gcov
+*.gcda
+*.gcno
+coverage/
+htmlcov/
+.coverage
+.coverage.*
+tarpaulin-report.html

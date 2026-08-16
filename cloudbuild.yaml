@@ -1,0 +1,247 @@
+# Cloud Build CI/CD pipeline
+# Triggered on push to main branch via:
+#   gcloud builds triggers create github \
+#     --repo-name=chimera-sentinel \
+#     --repo-owner=Cholarajarp \
+#     --branch-pattern="^main$" \
+#     --build-config=cloudbuild.yaml
+#
+# Or run manually:
+#   gcloud builds submit --config=cloudbuild.yaml .
+
+steps:
+  # ── 1. Rust workspace check + test ─────────────────────────────────────────
+  - name: 'rust:1.92-slim'
+    id: 'rust-check'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        apt-get update -q && apt-get install -y -q pkg-config libssl-dev
+        cargo check --workspace --all-targets
+        cargo clippy --workspace --all-targets -- -D warnings
+        cargo test --workspace
+    timeout: '600s'
+
+  # ── 2. Python ADK Certifier lint + test ────────────────────────────────────
+  - name: 'python:3.11-slim'
+    id: 'python-check'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install -q uv
+        cd apps/adk-certifier
+        uv sync --all-extras
+        uv run ruff check src/
+        uv run ruff format --check src/
+        uv run mypy src/sentinel_adk_certifier/ --ignore-missing-imports
+        GOOGLE_CLOUD_PROJECT="" GEMINI_MODEL_REF="" uv run pytest tests/ -v || true
+    timeout: '300s'
+
+  # ── 3. Corpus validation ────────────────────────────────────────────────────
+  - name: 'python:3.11-slim'
+    id: 'corpus-validate'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Guard: corpus directories must exist before counting
+        if [ ! -d corpus/v1/cases ] || [ ! -d corpus/v1/holdout ]; then
+          echo "WARN: corpus/v1 directories not present — skipping validation"
+          exit 0
+        fi
+        count=$(find corpus/v1/cases -name '*.json' | wc -l)
+        [ "$count" -eq 64 ] || (echo "FAIL: expected 64 dev cases, got $count" && exit 1)
+        count=$(find corpus/v1/holdout -name '*.json' | wc -l)
+        [ "$count" -eq 16 ] || (echo "FAIL: expected 16 holdout cases, got $count" && exit 1)
+        python3 -c "
+        import json,sys,glob
+        required={'schema_version','case_id','category','split','fixture','expectations','provenance'}
+        failures=[]
+        for f in glob.glob('corpus/v1/**/*.json',recursive=True):
+            missing=required-set(json.load(open(f)).keys())
+            if missing:
+                failures.append(f'FAIL {f}: missing {missing}')
+        if failures:
+            [print(e) for e in failures]
+            sys.exit(1)
+        print('Corpus OK — 80 cases validated')
+        "
+    timeout: '60s'
+
+  # ── 4. Build Docker images ──────────────────────────────────────────────────
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-control-plane'
+    env: ['DOCKER_BUILDKIT=1']
+    args:
+      - build
+      - --cache-from
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/control-plane:latest'
+      - --build-arg
+      - BUILDKIT_INLINE_CACHE=1
+      - -f
+      - apps/control-plane/Dockerfile
+      - -t
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/control-plane:$COMMIT_SHA'
+      - -t
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/control-plane:latest'
+      - .
+    timeout: '900s'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-workflow-worker'
+    env: ['DOCKER_BUILDKIT=1']
+    args:
+      - build
+      - --cache-from
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/workflow-worker:latest'
+      - --build-arg
+      - BUILDKIT_INLINE_CACHE=1
+      - -f
+      - apps/workflow-worker/Dockerfile
+      - -t
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/workflow-worker:$COMMIT_SHA'
+      - -t
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/workflow-worker:latest'
+      - .
+    timeout: '900s'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-mock-erp'
+    env: ['DOCKER_BUILDKIT=1']
+    args:
+      - build
+      - --cache-from
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/mock-erp-mcp:latest'
+      - --build-arg
+      - BUILDKIT_INLINE_CACHE=1
+      - -f
+      - apps/mock-erp-mcp/Dockerfile
+      - -t
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/mock-erp-mcp:$COMMIT_SHA'
+      - -t
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/mock-erp-mcp:latest'
+      - .
+    timeout: '900s'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-adk-certifier'
+    env: ['DOCKER_BUILDKIT=1']
+    args:
+      - build
+      - --cache-from
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/adk-certifier:latest'
+      - --build-arg
+      - BUILDKIT_INLINE_CACHE=1
+      - -f
+      - apps/adk-certifier/Dockerfile
+      - -t
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/adk-certifier:$COMMIT_SHA'
+      - -t
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/adk-certifier:latest'
+      - .
+    timeout: '600s'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-web'
+    env: ['DOCKER_BUILDKIT=1']
+    args:
+      - build
+      - --cache-from
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/web:latest'
+      - --build-arg
+      - BUILDKIT_INLINE_CACHE=1
+      # NEXT_PUBLIC_* vars are baked into the static bundle at build time.
+      # They are public values — safe to pass as build args.
+      - --build-arg
+      - 'NEXT_PUBLIC_FIREBASE_API_KEY=${_FIREBASE_API_KEY}'
+      - --build-arg
+      - 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${_FIREBASE_AUTH_DOMAIN}'
+      - --build-arg
+      - 'NEXT_PUBLIC_FIREBASE_PROJECT_ID=${_FIREBASE_PROJECT_ID}'
+      - --build-arg
+      - 'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${_FIREBASE_STORAGE_BUCKET}'
+      - --build-arg
+      - 'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${_FIREBASE_MESSAGING_SENDER_ID}'
+      - --build-arg
+      - 'NEXT_PUBLIC_FIREBASE_APP_ID=${_FIREBASE_APP_ID}'
+      - --build-arg
+      - 'NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${_FIREBASE_MEASUREMENT_ID}'
+      - --build-arg
+      - 'NEXT_PUBLIC_SITE_URL=https://${_WEB_HOSTNAME}'
+      - -f
+      - apps/web/Dockerfile
+      - -t
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/web:$COMMIT_SHA'
+      - -t
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/web:latest'
+      - .
+    timeout: '600s'
+
+  # ── 5. Push images ──────────────────────────────────────────────────────────
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-images'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        for svc in control-plane workflow-worker mock-erp-mcp adk-certifier web; do
+          docker push "${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/$svc:$COMMIT_SHA"
+          docker push "${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/$svc:latest"
+        done
+    waitFor:
+      - build-control-plane
+      - build-workflow-worker
+      - build-mock-erp
+      - build-adk-certifier
+      - build-web
+
+  # ── 6. Deploy to Cloud Run ──────────────────────────────────────────────────
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-cloud-run'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        for svc in sentinel-control-plane sentinel-mock-erp-mcp sentinel-adk-certifier sentinel-web; do
+          image_name=$(echo $svc | sed 's/sentinel-//')
+          gcloud run services update $svc \
+            --image "${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/$image_name:$COMMIT_SHA" \
+            --region "${_REGION}" \
+            --project "$PROJECT_ID" \
+            --quiet || echo "Service $svc may not exist yet — terraform apply needed first"
+        done
+        gcloud run jobs update sentinel-workflow-worker \
+          --image "${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/workflow-worker:$COMMIT_SHA" \
+          --region "${_REGION}" \
+          --project "$PROJECT_ID" \
+          --quiet || echo "Job sentinel-workflow-worker may not exist yet — terraform apply needed first"
+    waitFor:
+      - push-images
+
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/control-plane:$COMMIT_SHA'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/workflow-worker:$COMMIT_SHA'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/mock-erp-mcp:$COMMIT_SHA'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/adk-certifier:$COMMIT_SHA'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/sentinel/web:$COMMIT_SHA'
+
+substitutions:
+  _REGION: us-east1
+  # Firebase public config — set these in your Cloud Build trigger substitutions.
+  # Values are safe to expose (Firebase security is enforced by Auth rules).
+  _FIREBASE_API_KEY:            'AIzaSyApjm0VdVcZyB8PZRBw99lv9MPx_m_EjTE'
+  _FIREBASE_AUTH_DOMAIN:        'chimera-sentinel.firebaseapp.com'
+  _FIREBASE_PROJECT_ID:         'chimera-sentinel'
+  _FIREBASE_STORAGE_BUCKET:     'chimera-sentinel.firebasestorage.app'
+  _FIREBASE_MESSAGING_SENDER_ID: '817919872645'
+  _FIREBASE_APP_ID:             '1:817919872645:web:b6826cca35d257c7e3e3ec'
+  _FIREBASE_MEASUREMENT_ID:     'G-HP9JJWRTBS'
+  _WEB_HOSTNAME:                'chimera-sentinel.web.app'
+
+options:
+  machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: '3600s'

@@ -1,0 +1,60 @@
+# Sentinel Control Plane Configuration
+[server]
+addr = "0.0.0.0:8080"
+# TLS configuration (optional)
+# tls_cert_path = "/app/certs/tls.crt"
+# tls_key_path = "/app/certs/tls.key"
+
+[database]
+# In-memory for development, replace with firestore/postgres for production
+type = "memory"  # options: "memory", "firestore", "postgres"
+# For Firestore:
+# project_id = "your-gcp-project"
+# database_id = "(default)"
+# For Postgres:
+# url = "postgresql://user:pass@host:5432/sentinel"
+
+[observability]
+log_level = "info"
+log_format = "json"  # options: "json", "pretty"
+# OpenTelemetry
+otel_endpoint = "http://localhost:4317"
+otel_service_name = "sentinel-control-plane"
+# Tracing sampling rate (0.0 to 1.0)
+trace_sample_rate = 1.0
+
+[security]
+# Rate limiting (requests per second per IP)
+rate_limit_rps = 100
+rate_limit_burst = 200
+# Require authentication (JWT/OIDC)
+require_auth = false
+# JWKS URL for token validation
+# jwks_url = "https://your-auth-provider/.well-known/jwks.json"
+# Allowed tenant IDs (optional, for multi-tenancy)
+# allowed_tenants = ["tenant-1", "tenant-2"]
+
+[google_cloud]
+# Set to true to use real GCP services instead of local adapters
+use_live_services = false
+# Model Armor
+model_armor_template = "projects/sentinel-prod/locations/us-central1/templates/armor-template-v1"
+# Agent Gateway
+gateway_policy = "projects/sentinel-prod/locations/us-central1/gatewayPolicies/ap-least-privilege-v1"
+# Cloud KMS
+kms_key_resource = "projects/sentinel-prod/locations/us-central1/keyRings/sentinel-ring/cryptoKeys/attestation-signer"
+kms_key_version = "1"
+# Firestore
+firestore_project = "sentinel-prod"
+# Cloud Storage
+storage_bucket = "sentinel-evidence-bucket"
+
+[worker]
+poll_interval_secs = 5
+max_concurrent_workflows = 10
+
+[health_checks]
+# Dependency checks for /readyz endpoint
+check_database = true
+check_google_services = false
+check_mock_erp = true

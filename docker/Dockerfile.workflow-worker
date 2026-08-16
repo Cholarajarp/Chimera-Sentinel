@@ -1,0 +1,49 @@
+# Multi-stage Dockerfile for sentinel-workflow-worker
+FROM rust:1.92-slim-bookworm AS builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    libssl-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy workspace files
+COPY Cargo.toml Cargo.lock ./
+COPY crates ./crates
+COPY apps/workflow-worker ./apps/workflow-worker
+
+# Build the binary
+RUN cargo build --release --bin sentinel-workflow-worker
+
+# Runtime stage
+FROM debian:bookworm-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN useradd -r -s /bin/false -u 10001 sentinel
+
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /app/target/release/sentinel-workflow-worker /usr/local/bin/sentinel-workflow-worker
+
+# Copy any config files
+COPY docker/config /app/config
+
+# Set ownership
+RUN chown -R sentinel:sentinel /app
+
+USER sentinel
+
+ENV RUST_LOG=info
+ENV SENTINEL_CONFIG=/app/config/workflow-worker.toml
+
+ENTRYPOINT ["sentinel-workflow-worker"]

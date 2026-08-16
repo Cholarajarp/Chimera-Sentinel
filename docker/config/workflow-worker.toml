@@ -1,0 +1,48 @@
+# Sentinel Workflow Worker Configuration
+[worker]
+id = "worker-1"
+tenant_id = "00000000-0000-0000-0000-000000000001"
+poll_interval_secs = 5
+max_concurrent_workflows = 10
+# Graceful shutdown timeout
+shutdown_timeout_secs = 30
+
+[database]
+type = "memory"  # options: "memory", "firestore", "postgres"
+# For Firestore:
+# project_id = "your-gcp-project"
+# database_id = "(default)"
+# For Postgres:
+# url = "postgresql://user:pass@host:5432/sentinel"
+
+[observability]
+log_level = "info"
+log_format = "json"
+otel_endpoint = "http://localhost:4317"
+otel_service_name = "sentinel-workflow-worker"
+trace_sample_rate = 1.0
+
+[google_cloud]
+use_live_services = false
+model_armor_template = "projects/sentinel-prod/locations/us-central1/templates/armor-template-v1"
+gateway_policy = "projects/sentinel-prod/locations/us-central1/gatewayPolicies/ap-least-privilege-v1"
+kms_key_resource = "projects/sentinel-prod/locations/us-central1/keyRings/sentinel-ring/cryptoKeys/attestation-signer"
+kms_key_version = "1"
+firestore_project = "sentinel-prod"
+storage_bucket = "sentinel-evidence-bucket"
+
+[certification]
+# Corpus version to run
+corpus_version = "corpus-v1"
+# Required cases (comma-separated case IDs)
+required_cases = [
+    "__ALL_CORPUS_CASES__",
+]
+# Retest configuration
+retest_draft_case = "case-safe-invoice-001"
+retest_release_case = "case-excessive-agency-001"
+
+[health_checks]
+check_database = true
+check_google_services = false
+check_mock_erp = true

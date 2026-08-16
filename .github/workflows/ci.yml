@@ -1,0 +1,148 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # ── Rust workspace ────────────────────────────────────────────────────────
+  rust:
+    name: Rust — check / test / clippy / fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: cargo check (workspace)
+        run: cargo check --workspace --all-targets
+
+      - name: cargo fmt (check)
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy (deny warnings)
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: cargo test (workspace)
+        run: cargo test --workspace
+
+  # ── Python ADK Certifier ─────────────────────────────────────────────────
+  python:
+    name: Python — lint / type-check / test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/adk-certifier
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python 3.11
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: ruff lint
+        run: uv run ruff check src/
+
+      - name: ruff format check
+        run: uv run ruff format --check src/
+
+      - name: mypy type check
+        run: uv run mypy src/sentinel_adk_certifier/ --ignore-missing-imports
+
+      - name: pytest (unit, LOCAL mode only — no GCP creds in CI)
+        env:
+          GOOGLE_CLOUD_PROJECT: ""
+          GEMINI_MODEL_REF: ""
+        run: uv run pytest tests/ -v --cov=sentinel_adk_certifier --cov-report=xml
+
+  # ── Next.js web console ───────────────────────────────────────────────────
+  web:
+    name: Web — type-check / build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript check
+        run: pnpm exec tsc --noEmit
+
+      - name: Next.js build
+        env:
+          NEXT_PUBLIC_API_URL: ""
+        run: pnpm build
+
+  # ── Corpus manifest integrity ─────────────────────────────────────────────
+  corpus-validate:
+    name: Corpus — manifest count & schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify 64 development cases exist
+        run: |
+          count=$(ls corpus/v1/cases/*.json | wc -l)
+          echo "Development cases: $count"
+          [ "$count" -eq 64 ] || (echo "Expected 64 development cases, got $count" && exit 1)
+
+      - name: Verify 16 holdout cases exist
+        run: |
+          count=$(ls corpus/v1/holdout/*.json | wc -l)
+          echo "Holdout cases: $count"
+          [ "$count" -eq 16 ] || (echo "Expected 16 holdout cases, got $count" && exit 1)
+
+      - name: Validate case JSON schema
+        run: |
+          python3 -c "
+          import json, sys, glob
+          required = {'schema_version','case_id','category','split','fixture','expectations','provenance'}
+          for f in glob.glob('corpus/v1/cases/*.json') + glob.glob('corpus/v1/holdout/*.json'):
+              data = json.load(open(f))
+              missing = required - set(data.keys())
+              if missing:
+                  print(f'FAIL {f}: missing keys {missing}')
+                  sys.exit(1)
+          print('All corpus case files pass schema validation')
+          "

@@ -1,0 +1,58 @@
+steps:
+  - name: 'rust:1.92-slim'
+    id: 'rust-production-checks'
+    entrypoint: 'bash'
+    args:
+      - '-ceu'
+      - |
+        apt-get update -q
+        apt-get install -y -q pkg-config libssl-dev
+        rustup component add clippy
+        cargo check --workspace --all-targets
+        cargo clippy --workspace --all-targets -- -D warnings
+        cargo test --workspace
+    timeout: '1200s'
+
+  - name: 'python:3.11-slim'
+    id: 'certifier-contracts'
+    entrypoint: 'bash'
+    args:
+      - '-ceu'
+      - |
+        pip install -q uv==0.4.29
+        cd apps/adk-certifier
+        uv sync --all-extras
+        uv run pytest tests -v
+        uv run mypy src/sentinel_adk_certifier --ignore-missing-imports
+    timeout: '600s'
+
+  - name: 'node:20-alpine'
+    id: 'web-production-build'
+    entrypoint: 'sh'
+    args:
+      - '-ceu'
+      - |
+        corepack enable
+        corepack prepare pnpm@9.12.0 --activate
+        cd apps/web
+        pnpm install --frozen-lockfile
+        pnpm type-check
+        pnpm build
+    timeout: '600s'
+
+  - name: 'hashicorp/terraform:1.9.8'
+    id: 'terraform-validate'
+    entrypoint: 'sh'
+    args:
+      - '-ceu'
+      - |
+        terraform -chdir=infra/terraform fmt -check -recursive
+        terraform -chdir=infra/terraform init -backend=false -input=false
+        terraform -chdir=infra/terraform validate
+    timeout: '600s'
+
+options:
+  machineType: 'E2_STANDARD_2'
+  logging: 'CLOUD_LOGGING_ONLY'
+
+timeout: '1800s'
