@@ -16,7 +16,6 @@ figment = { version = "0.10", features = ["toml", "env"] }
 thiserror = { workspace = true }
 tracing-subscriber = { workspace = true }
 sentinel-domain = { path = "../domain" }
-sentinel-observability = { path = "../observability" }
 
 [dev-dependencies]
 tempfile = "3"
