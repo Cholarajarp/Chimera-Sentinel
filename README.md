@@ -390,7 +390,6 @@ make submission-check   # Full checklist before deadline
 |---|---|
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Complete system architecture, threat model, and data flows |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Step-by-step GCP deployment guide |
-| [`docs/HACKATHON_CHECKLIST.md`](docs/HACKATHON_CHECKLIST.md) | Submission requirements and rubric alignment |
 | [`SECURITY.md`](SECURITY.md) | Security policy and vulnerability reporting |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Development setup and contribution guidelines |
 
