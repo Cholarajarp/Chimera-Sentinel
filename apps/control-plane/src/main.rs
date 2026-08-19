@@ -682,16 +682,14 @@ async fn handle_scan_candidate(
     headers: HeaderMap,
     Path(revision_id_str): Path<String>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
-    use sentinel_domain::candidate::ScanResponse as _; // no-op type hint
     let tenant_id = extract_tenant(&headers)?;
     let rev_id = RevisionId(revision_id_str.to_string());
 
-    let candidate = match CandidateRepository::get(&*state.store, tenant_id, &rev_id)
+    let Some(candidate) = CandidateRepository::get(&*state.store, tenant_id, &rev_id)
         .await
         .map_err(|e| internal(e))?
-    {
-        Some(c) => c,
-        None => return Err(not_found("Candidate revision not found")),
+    else {
+        return Err(not_found("Candidate revision not found"));
     };
 
     // ── Honest LOCAL fallback (no GCP creds / not live) ──────────────────────
