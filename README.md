@@ -356,7 +356,7 @@ Every piece of data in the system carries an explicit provenance label:
 |---|---|
 | `LIVE` | Produced by a successful managed/local system call with linked evidence |
 | `REPLAY` | Immutable prior evidence rendered without current side effects |
-| `DEMO` | Synthetic curated scenario |
+| `SYSTEM_TEST` | Synthetic curated scenario for system tests |
 | `INFERRED` | Model/statistical interpretation, not a direct observation |
 | `LOCAL` | Local adapter or emulator — never proof of a managed integration |
 

@@ -231,7 +231,7 @@ Never include raw invoice text, prompts, credentials, or free-form model chain-o
 
 - `LIVE`: produced by a successful current managed/local system call and linked to evidence.
 - `REPLAY`: immutable prior evidence rendered or rerun without current side effects.
-- `DEMO`: synthetic curated scenario.
+- `SYSTEM_TEST`: synthetic curated scenario for system tests.
 - `INFERRED`: model/statistical interpretation that is not a direct observation.
 - `LOCAL`: local adapter or emulator behavior, never proof of a managed integration.
 
@@ -369,7 +369,7 @@ Required dashboards/alerts: workflow completion and failure, queue age, p95 dura
 
 ## Local, replay, and demo modes
 
-Adapters implement the same typed interfaces, but mode is explicit at startup and embedded in every output. `LOCAL` can exercise development logic; `REPLAY` can demonstrate prior immutable evidence; `DEMO` identifies synthetic content. A certification policy requiring live Google controls rejects all three as substitutes for `LIVE`. There is no catch-and-fallback behavior.
+Adapters implement the same typed interfaces, but mode is explicit at startup and embedded in every output. `LOCAL` can exercise development logic; `REPLAY` can demonstrate prior immutable evidence; `SYSTEM_TEST` identifies synthetic content. A certification policy requiring live Google controls rejects all three as substitutes for `LIVE`. There is no catch-and-fallback behavior.
 
 ## Google Cloud requirement mapping
 

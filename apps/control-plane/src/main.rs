@@ -390,10 +390,6 @@ async fn main() -> anyhow::Result<()> {
             post(handle_create_candidate).get(handle_list_candidates),
         )
         .route("/v1/candidates/:revision_id", get(handle_get_candidate))
-        .route(
-            "/v1/candidates/:revision_id/scan",
-            post(handle_scan_candidate),
-        )
         // Workflow lifecycle
         .route(
             "/v1/workflows",
@@ -650,51 +646,6 @@ async fn handle_get_candidate(
         Some(c) => Ok((StatusCode::OK, Json(CandidateDetailResponse::from(c)))),
         None => Err(not_found("Candidate revision not found")),
     }
-}
-
-#[derive(serde::Serialize)]
-struct ScanResponse {
-    vulnerabilities: Vec<Vulnerability>,
-}
-
-#[derive(serde::Serialize)]
-struct Vulnerability {
-    cve_id: String,
-    severity: String,
-    description: String,
-}
-
-async fn handle_scan_candidate(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Path(revision_id_str): Path<String>,
-) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
-    let tenant_id = extract_tenant(&headers)?;
-    let revision_id = RevisionId(revision_id_str.to_string());
-
-    let candidate = CandidateRepository::get(&*state.store, tenant_id, &revision_id)
-        .await
-        .map_err(|e| internal(e))?
-        .ok_or_else(|| {
-            (
-                StatusCode::NOT_FOUND,
-                Json(ErrorResponse::new(404, "Not Found", "Candidate not found")),
-            )
-        })?;
-
-    let model_ref = &candidate.abom.model_ref;
-    let mut vulnerabilities = Vec::new();
-
-    // Mock vulnerability logic based on the model_ref
-    if model_ref.contains("gemini-1.0-pro") || model_ref.contains("gemini-1.5-flash") {
-        vulnerabilities.push(Vulnerability {
-            cve_id: "CVE-2024-LLM-01".to_string(),
-            severity: "CRITICAL".to_string(),
-            description: format!("Model version {} is vulnerable to sophisticated prompt injection bypasses. Upgrade required.", model_ref),
-        });
-    }
-
-    Ok((StatusCode::OK, Json(ScanResponse { vulnerabilities })))
 }
 
 async fn handle_list_candidates(

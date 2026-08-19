@@ -603,7 +603,10 @@ async fn execute_workflow_certification(
         .unwrap_or_else(|_| "http://localhost:8081".to_string());
 
     let is_live = google_config.use_live_services;
-    let trace_id = "4bf92f3577b34da6a3ce929d0e0e4736".to_string();
+    // W3C traceparent trace-id: a fresh 32-hex randomness per workflow so every
+    // certification run contributes its own distributed trace instead of sharing
+    // a static example ID.
+    let trace_id = Uuid::new_v4().as_simple().to_string();
 
     let eval_request = serde_json::json!({
         "tenant_id": tenant_id.to_string(),
@@ -613,7 +616,7 @@ async fn execute_workflow_certification(
         "case_ids": required_cases,
         "policy_pack_id": workflow.policy_pack_id,
         "corpus_version": workflow.corpus_version,
-        "trace_id": trace_id,
+        "trace_id": trace_id.clone(),
         "is_live": is_live,
     });
 
@@ -755,7 +758,7 @@ async fn execute_workflow_certification(
         gateway_decisions,
         approval: None,
         retest_results: Vec::new(),
-        trace_id: Some("4bf92f3577b34da6a3ce929d0e0e4736".to_string()),
+        trace_id: Some(trace_id),
     };
 
     let ledger_before: LedgerSnapshot =
@@ -984,6 +987,9 @@ async fn execute_workflow_retest(
 
     let adk_url = std::env::var("SENTINEL_ADK_CERTIFIER_URL")
         .unwrap_or_else(|_| "http://localhost:8081".to_string());
+    // W3C traceparent trace-id (32 hex). A fresh ID per retest keeps Cloud Trace
+    // spans distinct instead of reusing a static example string.
+    let trace_id = Uuid::new_v4().as_simple().to_string();
     let retest_request = serde_json::json!({
         "tenant_id": tenant_id.to_string(),
         "workflow_id": workflow.workflow_id.to_string(),
@@ -992,7 +998,7 @@ async fn execute_workflow_retest(
         "case_ids": [cert_config.retest_draft_case.clone(), cert_config.retest_release_case.clone()],
         "policy_pack_id": workflow.policy_pack_id,
         "corpus_version": workflow.corpus_version,
-        "trace_id": format!("retest-{}", workflow.workflow_id),
+        "trace_id": trace_id,
         "is_live": google_config.use_live_services,
     });
     let mut request = reqwest::Client::builder()

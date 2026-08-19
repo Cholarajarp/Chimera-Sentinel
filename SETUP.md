@@ -141,7 +141,9 @@ make bootstrap
 
 # 2. Copy environment config
 cp .env.example .env
-# Leave API_URL commented out for local mode
+# Set API_URL to your local control plane (the web console is a strict proxy — it
+# has no simulation fallback):
+echo "API_URL=http://localhost:8080" >> .env
 
 # 3. Start services (separate terminals)
 make run-mcp        # ERP adapter    → :9090
@@ -156,14 +158,12 @@ docker compose up --build
 
 Open `http://localhost:3000`.
 
-**What happens locally when `API_URL` is not set:**
-- The Next.js web console handles all API calls through an in-process fallback module (`apps/web/src/lib/control-plane.ts`)
-- State lives in process-local `Map`s — it resets on server restart
-- The "signature" in attestations is a SHA-256 stand-in, not a real KMS signature
-- Every response carries `provenance: "LOCAL_FALLBACK"` so you cannot mistake it for production data
-- No real Gemini, Model Armor, Agent Gateway, or ERP oracle calls are made
-
-This mode is **only for UI development**. To test the real certification pipeline, see Section 5.
+**What happens when `API_URL` is not set:**
+- The web console is a strict pass-through and has **no simulation fallback**.
+- If `API_URL` is missing, the `/api/*` route handler refuses to serve and
+  returns a fatal `500` so the misconfiguration is never confused with live data.
+- To develop against a real (local) backend, start the Rust control plane and
+  set `API_URL=http://localhost:8080`. To test the full GCP pipeline, see Section 5.
 
 ---
 
@@ -234,7 +234,7 @@ When the web console is deployed on Cloud Run, `API_URL` is already wired to the
 
 | Variable | Where Set | Purpose |
 |---|---|---|
-| `API_URL` | Terraform / Cloud Run env | **Server-side.** URL the Next.js proxy sends every API request to. When set → all data comes from the Rust control plane. When absent → in-process fallback (local mode). |
+| `API_URL` | Terraform / Cloud Run env | **Server-side.** URL the Next.js proxy sends every API request to. Required — there is no simulation fallback; if unset the proxy returns a fatal `500`. |
 | `NEXTAUTH_SECRET` | Secret Manager | Session cookie signing secret. |
 | `NEXTAUTH_URL` | Terraform | Public URL of the web console. |
 
@@ -275,16 +275,15 @@ Next.js Server (apps/web)
   │
   │  [apps/web/src/app/api/[...path]/route.ts]
   │
-  ├── If API_URL is set (production):
+  ├── If API_URL is set (production / local Rust):
   │     Forward request → Rust control plane (with OIDC token)
   │     Stream response back → browser
   │
-  └── If API_URL is absent (local dev):
-        Handle in-process (control-plane.ts fallback)
-        All responses carry provenance: "LOCAL_FALLBACK"
+  └── If API_URL is absent:
+        Refuse with a fatal 500 (no mock fallback)
 ```
 
-**The browser never calls the Rust API directly.** All calls go through the `/api/*` Next.js route handler, which either proxies to Rust (production) or uses the local fallback.
+**The browser never calls the Rust API directly.** All calls go through the `/api/*` Next.js route handler, which proxies to Rust. It never holds canonical state and has no simulation fallback.
 
 This means:
 - CORS is not an issue — only the Next.js server makes requests to the Rust API
@@ -423,18 +422,19 @@ Every piece of data in the system carries an explicit `provenance` field:
 | Value | Meaning |
 |---|---|
 | `LIVE` | Produced by a successful live managed service call (Model Armor, Gateway, KMS, Firestore) |
-| `LOCAL_FALLBACK` | Produced by the Next.js in-process module when `API_URL` is absent — never proof of a managed service |
 | `REPLAY` | Immutable prior evidence rendered without new side effects |
+| `SYSTEM_TEST` | Synthetic curated scenario for system tests |
 | `INFERRED` | Model/statistical interpretation, not a direct observation |
+| `LOCAL` | Local adapter or emulator — never proof of a managed integration |
 
-If you see `LOCAL_FALLBACK` in a production deployment, `API_URL` is not set on the web Cloud Run service. Check the Terraform output and ensure `API_URL` is wired correctly.
+The web console is a strict proxy and contributes **no** provenance of its own. If `API_URL` is not set, the `/api/*` route handler refuses to serve with a fatal `500` rather than fabricate data — so a missing control plane is always visible and never masked as a provenance label. Check the Terraform output and ensure `API_URL` is wired correctly.
 
 ---
 
 ## Quick Troubleshooting
 
-**Web console shows `provenance: LOCAL_FALLBACK` in production**
-→ `API_URL` is not set on the web Cloud Run service. Run `terraform -chdir=infra/terraform apply` to re-wire it.
+**Web console `/api/*` requests return `500`**
+→ `API_URL` is not set on the web Cloud Run service, and the proxy has no simulation fallback. Run `terraform -chdir=infra/terraform apply` to re-wire it.
 
 **Workflow stays in `QUEUED` or `RUNNING` indefinitely**
 → The workflow-worker is not running or cannot reach the ADK certifier. Check Cloud Run logs for `sentinel-workflow-worker`.
@@ -443,7 +443,7 @@ If you see `LOCAL_FALLBACK` in a production deployment, `API_URL` is not set on 
 → The reviewer's role matches the ABOM owner — separation of duties enforced. Use a different reviewer principal.
 
 **`attestation-verify` fails with signature error**
-→ The attestation was produced in local fallback mode (SHA-256 stand-in, not KMS). Only attestations produced against a live KMS key will verify.
+→ The attestation was produced by the offline `demo/attestation-sample.json` test vector (local HMAC stand-in, not KMS). Only attestations produced against a live KMS key will verify.
 
 **ADK certifier returns `is_live: false` observations**
 → One or more managed service env vars (`MODEL_ARMOR_TEMPLATE`, `AGENT_GATEWAY_RESOURCE`, `MEMORY_BANK_RESOURCE`) are not set. Run `bash infra/scripts/setup-managed-agents.sh` and redeploy.

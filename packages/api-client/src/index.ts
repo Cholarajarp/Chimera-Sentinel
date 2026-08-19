@@ -26,7 +26,7 @@ export interface AgentBillOfMaterials {
   environment: string;
   owner: string;
   risk_tier: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  provenance: 'LIVE' | 'REPLAY' | 'DEMO' | 'INFERRED' | 'LOCAL';
+  provenance: 'LIVE' | 'REPLAY' | 'SYSTEM_TEST' | 'INFERRED' | 'LOCAL';
   recorded_at: string;
 }
 
