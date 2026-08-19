@@ -31,10 +31,10 @@
 
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
 
-use sentinel_config::{LogFormat, ObservabilityConfig};
+use sentinel_domain::{LogFormat, ObservabilityConfig};
 
 /// Configuration snapshot used by `init_telemetry`.
-pub use sentinel_config::ObservabilityConfig as TelemetryConfig;
+pub use sentinel_domain::ObservabilityConfig as TelemetryConfig;
 
 /// Guard that flushes the OpenTelemetry tracer provider on drop.
 ///
@@ -136,15 +136,16 @@ pub fn init_telemetry_with_name(
         .with(env_filter)
         .with(fmt_layer);
 
-    let registry = if let Some(layer) = registry_layer {
-        registry.with(layer)
+    if let Some(layer) = registry_layer {
+        registry
+            .with(layer)
+            .try_init()
+            .map_err(|e| format!("failed to set global tracing subscriber: {e}"))?;
     } else {
         registry
-    };
-
-    registry
-        .try_init()
-        .map_err(|e| format!("failed to set global tracing subscriber: {e}"))?;
+            .try_init()
+            .map_err(|e| format!("failed to set global tracing subscriber: {e}"))?;
+    }
 
     Ok(guard)
 }
@@ -156,11 +157,12 @@ fn build_otlp_layer(
     gcp_project: Option<&str>,
 ) -> Result<
     (
-        tracing_opentelemetry::OpenTelemetryLayer<tracing_subscriber::Registry>,
+        impl Layer<tracing_subscriber::Registry> + Send + Sync,
         opentelemetry_sdk::trace::TracerProvider,
     ),
     String,
 > {
+    use opentelemetry::trace::TracerProvider as _;
     use opentelemetry::KeyValue;
     use opentelemetry_otlp::{Protocol, WithExportConfig};
     use opentelemetry_sdk::runtime::Tokio;
