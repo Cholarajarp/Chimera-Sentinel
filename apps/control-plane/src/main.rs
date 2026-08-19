@@ -682,7 +682,7 @@ async fn handle_scan_candidate(
     headers: HeaderMap,
     Path(revision_id_str): Path<String>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
-    use sentinel_doc_main::candidate::ScanResponse as _; // no-op type hint
+    use sentinel_domain::candidate::ScanResponse as _; // no-op type hint
     let tenant_id = extract_tenant(&headers)?;
     let rev_id = RevisionId(revision_id_str.to_string());
 
@@ -746,7 +746,7 @@ async fn handle_scan_candidate(
         location: &location,
         resource_uri: &resource_uri,
     };
-    match sentinel_google_adapters::artifact_registry::scan(target, &access_token).await {
+    match sentinel_google_adapters::artifact_registry::scan(&target, &access_token).await {
         Ok(scan) => {
             info!(
                 "Live vulnerability scan for candidate {} reported {} CVEs",
