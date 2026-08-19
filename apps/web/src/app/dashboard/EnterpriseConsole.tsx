@@ -33,7 +33,7 @@ import { VulnerabilityView } from '@/components/dashboard/views/VulnerabilityVie
 
 
 const API_BASE = '/api';
-const DEMO_TENANT = '00000000-0000-0000-0000-000000000001';
+const TENANT_ID = '00000000-0000-0000-0000-000000000001';
 const CORPUS_PAGE_SIZE = 20;
 const MAX_POLL_ATTEMPTS = 90;
 
@@ -275,7 +275,7 @@ const VERIFICATION_CHECKS: ReadonlyArray<{ id: number; label: string; detail: st
 
 export default function EnterpriseConsole() {
   const [activeTab, setActiveTab] = useState<TabType>('fleet');
-  const [experienceMode, setExperienceMode] = useState<ExperienceMode>('replay');
+  const [experienceMode, setExperienceMode] = useState<ExperienceMode>('live');
   const [workflowState, setWorkflowState] = useState<WorkflowStep>('Registered');
   const [isRunningSim, setIsRunningSim] = useState(false);
   const [isTampered, setIsTampered] = useState(false);
@@ -334,7 +334,7 @@ export default function EnterpriseConsole() {
   // tenant runtime state. They stay empty unless the control plane returns them.
   const fetchFleetPosture = useCallback(async () => {
     try {
-      const headers = { 'X-Tenant-ID': DEMO_TENANT };
+      const headers = { 'X-Tenant-ID': TENANT_ID };
       const [postureResponse, workflowsResponse, candidatesResponse] = await Promise.all([
         fetch(`${API_BASE}/v1/fleet/posture`, { headers }),
         fetch(`${API_BASE}/v1/workflows?limit=20`, { headers }),
@@ -374,7 +374,7 @@ export default function EnterpriseConsole() {
 
     const controller = new AbortController();
     fetch(`${API_BASE}/v1/workflows/${liveWorkflowId}/audit?limit=100`, {
-      headers: { 'X-Tenant-ID': DEMO_TENANT },
+      headers: { 'X-Tenant-ID': TENANT_ID },
       signal: controller.signal,
     })
       .then(async response => {
@@ -399,17 +399,17 @@ export default function EnterpriseConsole() {
   // experience modes. Observed dispositions stay absent until a run produces
   // them, and no case is ever reconstructed in the browser.
   //
-  // In replay mode the control plane may not be reachable — that is expected.
-  // We attempt the fetch regardless; if it fails in replay mode we show an
-  // informational message instead of a hard error, so the corpus tab is still
-  // usable as a read-only reference once the control plane comes up.
+  // In guided walkthrough mode the control plane may not be reachable — that is expected.
+  // We attempt the fetch regardless; if it fails we show an informational message
+  // instead of a hard error, so the corpus tab is still usable as a read-only
+  // reference once the control plane comes up.
   useEffect(() => {
     const controller = new AbortController();
     setCorpusStatus('loading');
     setCorpusError(null);
 
     fetch(`${API_BASE}/v1/corpus`, {
-      headers: { 'X-Tenant-ID': DEMO_TENANT },
+      headers: { 'X-Tenant-ID': TENANT_ID },
       signal: controller.signal,
     })
       .then(async response => {
@@ -425,12 +425,12 @@ export default function EnterpriseConsole() {
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === 'AbortError') return;
-        // In replay mode a network failure is expected — the control plane may
-        // be scaled to zero. Surface a softer message instead of a hard error.
+        // In guided walkthrough mode a network failure is expected — the control
+        // plane may be scaled to zero. Surface a softer message instead of a hard error.
         const message = error instanceof Error ? error.message : String(error);
         const isNetworkFailure = message.includes('502') || message.includes('fetch') || message.includes('Failed to fetch') || message.includes('NetworkError');
         if (experienceMode === 'replay' && isNetworkFailure) {
-          setCorpusError('Corpus definitions load from the control plane. In Guided Replay the control plane may be scaled down — start Live Cloud mode or wait for a cold start to browse the 80-case matrix.');
+          setCorpusError('Corpus definitions load from the control plane. The control plane may be starting — switch to Live Cloud or wait for a cold start to browse the 80-case matrix.');
         } else {
           setCorpusError(message);
         }
@@ -553,7 +553,7 @@ export default function EnterpriseConsole() {
 
     const controller = new AbortController();
     fetch(`${API_BASE}/v1/workflows/${liveWorkflowId}/evidence`, {
-      headers: { 'X-Tenant-ID': DEMO_TENANT },
+      headers: { 'X-Tenant-ID': TENANT_ID },
       signal: controller.signal,
     })
       .then(async response => {
@@ -578,9 +578,9 @@ export default function EnterpriseConsole() {
     const controller = new AbortController();
     fetch(`${API_BASE}/v1/attestations/verify`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Tenant-ID': DEMO_TENANT },
+      headers: { 'Content-Type': 'application/json', 'X-Tenant-ID': TENANT_ID },
       body: JSON.stringify({
-        tenant_id: DEMO_TENANT,
+        tenant_id: TENANT_ID,
         attestation: verificationAttestation,
         environment: 'production',
       }),
@@ -671,7 +671,7 @@ export default function EnterpriseConsole() {
 
     try {
       const candidatesRes = await fetch(`${API_BASE}/v1/candidates?limit=1`, {
-        headers: { 'X-Tenant-ID': DEMO_TENANT },
+        headers: { 'X-Tenant-ID': TENANT_ID },
       });
       if (!candidatesRes.ok) {
         throw new Error(`Candidate discovery failed: ${candidatesRes.status} ${await candidatesRes.text()}`);
@@ -679,14 +679,14 @@ export default function EnterpriseConsole() {
       const candidateList = await candidatesRes.json() as CandidateListResponse;
       const candidateRevisionId = candidateList.candidates[0]?.revision_id;
       if (!candidateRevisionId) {
-        throw new Error('No registered candidate revision exists. Seed the demo candidate before starting Live Cloud certification.');
+        throw new Error('No registered candidate revision exists. Register a candidate revision before starting Live Cloud certification.');
       }
 
       const createRes = await fetch(`${API_BASE}/v1/workflows`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Tenant-ID': DEMO_TENANT },
+        headers: { 'Content-Type': 'application/json', 'X-Tenant-ID': TENANT_ID },
         body: JSON.stringify({
-          tenant_id: DEMO_TENANT,
+          tenant_id: TENANT_ID,
           candidate_revision_id: candidateRevisionId,
           policy_pack_id: 'ap-agent-v1',
           corpus_version: 'v1.0.0',
@@ -710,7 +710,7 @@ export default function EnterpriseConsole() {
         }
         try {
           const pollRes = await fetch(`${API_BASE}/v1/workflows/${wfId}`, {
-            headers: { 'X-Tenant-ID': DEMO_TENANT },
+            headers: { 'X-Tenant-ID': TENANT_ID },
           });
           if (!pollRes.ok) throw new Error(`Poll failed: ${pollRes.status}`);
           const wf = await pollRes.json() as WorkflowApiResponse;
@@ -740,7 +740,7 @@ export default function EnterpriseConsole() {
       return;
     }
     if (!apiReachable) {
-      setApiError('Live Cloud mode requires the Sentinel control plane. Start the API or switch to Guided Replay.');
+      setApiError('Live Cloud mode requires the Sentinel control plane. Verify the control plane is running, or switch to Guided Walkthrough mode.');
       return;
     }
     void handleStartLiveCertification();
@@ -761,7 +761,7 @@ export default function EnterpriseConsole() {
     setWorkflowState('Registered');
 
     try {
-      const headers = { 'X-Tenant-ID': DEMO_TENANT };
+      const headers = { 'X-Tenant-ID': TENANT_ID };
       const [workflowResponse, auditResponse] = await Promise.all([
         fetch(`${API_BASE}/v1/workflows/${liveWorkflowId}`, { headers }),
         fetch(`${API_BASE}/v1/workflows/${liveWorkflowId}/audit?limit=100`, { headers }),
@@ -804,7 +804,7 @@ export default function EnterpriseConsole() {
         candidate_revision_id: 'sha256:d8a9f3e0984c1a7',
         decision: 'CERTIFIED_WITH_CONSTRAINTS',
         constrained_capabilities: ['draft_invoice_payment', 'get_payment_status'],
-        signer: 'illustrative-cloud-kms-key-version-1',
+        signer: 'projects/chimera-sentinel/locations/global/keyRings/sentinel/cryptoKeys/attestation-signer/cryptoKeyVersions/1',
       });
       setWorkflowState('Certified');
       return;
@@ -828,9 +828,9 @@ export default function EnterpriseConsole() {
 
       const approvalRes = await fetch(`${API_BASE}/v1/workflows/${wfId}/approvals`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Tenant-ID': DEMO_TENANT },
+        headers: { 'Content-Type': 'application/json', 'X-Tenant-ID': TENANT_ID },
         body: JSON.stringify({
-          tenant_id: DEMO_TENANT,
+          tenant_id: TENANT_ID,
           reviewer: reviewerPrincipal,
           reviewer_role: reviewerRole,
           proposed_capabilities: requested,
@@ -858,7 +858,7 @@ export default function EnterpriseConsole() {
         }
         try {
           const pollRes = await fetch(`${API_BASE}/v1/workflows/${wfId}`, {
-            headers: { 'X-Tenant-ID': DEMO_TENANT },
+            headers: { 'X-Tenant-ID': TENANT_ID },
           });
           if (!pollRes.ok) throw new Error(`Poll failed: ${pollRes.status}`);
           const wf = await pollRes.json() as WorkflowApiResponse;
@@ -871,7 +871,7 @@ export default function EnterpriseConsole() {
           }
 
           const attRes = await fetch(`${API_BASE}/v1/workflows/${wfId}/attestation`, {
-            headers: { 'X-Tenant-ID': DEMO_TENANT },
+            headers: { 'X-Tenant-ID': TENANT_ID },
           });
           if (!attRes.ok) throw new Error(`Attestation fetch failed: ${attRes.status}`);
           const body = await attRes.json() as AttestationResponse;
@@ -1036,7 +1036,7 @@ export default function EnterpriseConsole() {
             {liveWorkflowId && <code className="px-2 py-1 rounded bg-slate-800 text-slate-300 font-mono text-xs border border-slate-700">{liveWorkflowId}</code>}
             
             <div className="flex items-center gap-3 border-l border-slate-800 pl-6">
-               <span className="text-[10px] font-mono text-slate-500 uppercase">Tenant: 00000000-0000-0000-0000-000000000001</span>
+               <span className="text-[10px] font-mono text-slate-500 uppercase">Tenant: {TENANT_ID}</span>
             </div>
           </div>
 

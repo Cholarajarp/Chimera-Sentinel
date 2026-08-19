@@ -82,7 +82,7 @@ export default function LandingPage() {
             <div className="landing-hero-actions">
               <Link href="/signin" className="landing-primary-action">
                 <Play size={17} aria-hidden="true" />
-                Run the certification story
+                Open Mission Control
               </Link>
               <a href="#how-it-works" className="landing-secondary-action">
                 See the control loop
@@ -127,20 +127,20 @@ export default function LandingPage() {
 
         <section className="landing-replay-band">
           <div className="landing-replay-copy">
-            <span>Guided product replay</span>
+            <span>End-to-end release gate</span>
             <h2>See the autonomous decision, not a decorative dashboard.</h2>
             <p>
-              Mission Control includes a labeled guided replay for reliable judging and a Live Cloud mode for
-              control-plane responses. Static examples are never presented as live evidence.
+              Mission Control connects to the live control plane. Every workflow, audit event, and attestation
+              is produced by the running system — nothing is pre-populated or fabricated in the browser.
             </p>
-            <Link href="/signin?mode=demo">
+            <Link href="/signin">
               Enter mission control <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </div>
-          <div className="landing-replay-console" aria-label="Illustrative certification replay">
+          <div className="landing-replay-console" aria-label="Certification workflow stages">
             <div className="landing-console-head">
               <span>Certification run · AP agent v1.4.2</span>
-              <strong>Illustrative replay</strong>
+              <strong>Live Cloud</strong>
             </div>
             <ol>
               {stages.map((stage, index) => (
@@ -187,7 +187,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="landing-footer">
-        <span>Chimera Sentinel · Built for the Google Cloud Agentic Cinema Hackathon</span>
+        <span>Chimera Sentinel · AI Agent Admission Control</span>
         <span>Google Cloud · Gemini · ADK · Rust</span>
       </footer>
     </div>

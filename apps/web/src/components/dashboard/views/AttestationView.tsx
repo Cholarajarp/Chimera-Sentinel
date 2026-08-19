@@ -85,7 +85,7 @@ export function AttestationView(props: any) {
                       ? 'No attestation has been issued yet. Complete a certification run to produce a signed envelope, then it is verified here.'
                       : isLiveConnected
                         ? 'Submitting the envelope to the control-plane verifier…'
-                        : 'This guided-replay envelope is illustrative and is not cryptographically verified. Switch to Live Cloud to verify a real Cloud KMS signature.'}
+                        : 'This guided walkthrough envelope is not cryptographically verified by the control plane. Switch to Live Cloud to verify a real Cloud KMS signature.'}
                   </p>
                 )}
 
@@ -110,7 +110,7 @@ export function AttestationView(props: any) {
                 </ol>
               </div>
 
-              {/* Envelope JSON Viewer — live data if certified, demo otherwise */}
+              {/* Envelope JSON Viewer — live data if certified, walkthrough otherwise */}
               <div className="glass-panel" style={{ padding: '1.75rem' }}>
                 <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--text-accent)' }}>
                   Canonical Attestation Envelope

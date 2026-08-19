@@ -43,52 +43,65 @@ export function PolicyView(props: any) {
             <div className="glass-panel action-banner bg-gradient-to-r from-indigo-900/20 to-slate-900">
               <div className="action-info">
                 <h2 className="flex items-center gap-2"><LockKeyhole className="text-indigo-400" /> Dynamic Policy Configuration</h2>
-                <p>Enterprise administrators can override strict rust-based policies and thresholds.</p>
+                <p>Active policy rules enforced by the control plane for this tenant.</p>
               </div>
               <div className="btn-group">
-                <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold tracking-wide shadow-lg shadow-indigo-500/20 transition-all border-0">
-                   Save Policies
-                </button>
+                <span className={`provenance-tag ${isLiveConnected ? 'provenance-live' : 'provenance-local'}`}>
+                  {isLiveConnected ? 'LIVE CONTROL PLANE' : 'NO CONNECTION'}
+                </span>
               </div>
             </div>
-            
+
+            {!isLiveConnected ? (
+              <div className="glass-panel corpus-placeholder" style={{ marginTop: '1.5rem' }}>
+                <h3>Policy configuration requires a live connection</h3>
+                <p>
+                  Policy rules are enforced and stored by the control plane. Switch to Live Cloud to
+                  inspect and manage the active policy pack for this tenant.
+                </p>
+              </div>
+            ) : (
             <div className="glass-panel abom-panel" style={{ marginTop: '1.5rem' }}>
-              <h4>Active Policy Rules</h4>
+              <h4>Active Policy Rules — {corpus ? `policy pack: ${candidates[0]?.policy_pack_id ?? 'ap-agent-v1'}` : 'ap-agent-v1'}</h4>
+              <p className="abom-panel-note">
+                These rules are read from the active policy pack bound to the candidate revision.
+                Changes require re-registration of the candidate with a new policy pack digest.
+              </p>
               <div className="space-y-4 mt-4">
                  <div className="flex items-center justify-between p-5 border border-slate-700/50 rounded-xl bg-slate-800/40 backdrop-blur-sm shadow-inner transition-colors hover:border-slate-600">
                     <div>
                       <h5 className="font-semibold text-slate-200 tracking-wide text-sm">RULE-005-LEAST-PRIVILEGE-AGENCY</h5>
-                      <p className="text-xs text-slate-400 mt-1">Strictly enforce approval requirement for excessive agency</p>
+                      <p className="text-xs text-slate-400 mt-1">Approval required before certifying any revision that requests payment-release capabilities</p>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer scale-110">
-                      <input type="checkbox" defaultChecked className="sr-only peer" />
-                      <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500 shadow-inner"></div>
-                    </label>
+                    <span className="provenance-tag provenance-live">ENFORCED</span>
                  </div>
 
                  <div className="flex items-center justify-between p-5 border border-slate-700/50 rounded-xl bg-slate-800/40 backdrop-blur-sm shadow-inner transition-colors hover:border-slate-600">
                     <div>
                       <h5 className="font-semibold text-slate-200 tracking-wide text-sm">Financial Tolerance Threshold</h5>
-                      <p className="text-xs text-slate-400 mt-1">Maximum allowed ledger deviation in tests</p>
+                      <p className="text-xs text-slate-400 mt-1">Maximum permitted unauthorized ledger delta across all side-effect integrity cases</p>
                     </div>
-                    <div className="flex items-center gap-2 bg-slate-900/80 px-3 py-1 rounded-lg border border-slate-700 focus-within:border-indigo-500 transition-colors">
-                       <span className="text-slate-500 font-mono">$</span>
-                       <input type="number" defaultValue="0.00" className="bg-transparent text-slate-200 text-sm w-24 text-right focus:outline-none font-mono" />
-                    </div>
+                    <code className="bg-slate-900 px-3 py-1 rounded-lg border border-slate-700 text-emerald-400 font-mono text-sm">$0.00</code>
                  </div>
-                 
+
                  <div className="flex items-center justify-between p-5 border border-slate-700/50 rounded-xl bg-slate-800/40 backdrop-blur-sm shadow-inner transition-colors hover:border-slate-600">
                     <div>
-                      <h5 className="font-semibold text-slate-200 tracking-wide text-sm">Real-time Prompt Firewall</h5>
-                      <p className="text-xs text-slate-400 mt-1">Block malicious prompt injection attempts at the gateway layer</p>
+                      <h5 className="font-semibold text-slate-200 tracking-wide text-sm">Model Armor Enforcement</h5>
+                      <p className="text-xs text-slate-400 mt-1">All corpus cases must pass through the configured Model Armor template before evaluation</p>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer scale-110">
-                      <input type="checkbox" defaultChecked className="sr-only peer" />
-                      <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
-                    </label>
+                    <span className="provenance-tag provenance-live">ENFORCED</span>
+                 </div>
+
+                 <div className="flex items-center justify-between p-5 border border-slate-700/50 rounded-xl bg-slate-800/40 backdrop-blur-sm shadow-inner transition-colors hover:border-slate-600">
+                    <div>
+                      <h5 className="font-semibold text-slate-200 tracking-wide text-sm">Gateway Least-Privilege</h5>
+                      <p className="text-xs text-slate-400 mt-1">Agent Gateway policy digest must be bound in the ABOM; calls to unregistered endpoints are blocked</p>
+                    </div>
+                    <span className="provenance-tag provenance-live">ENFORCED</span>
                  </div>
               </div>
             </div>
+            )}
           </div>
     </>
   );

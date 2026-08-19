@@ -46,7 +46,7 @@ export function ApprovalView(props: any) {
                 <p>Enforce least-privilege capability reduction before release certification</p>
               </div>
               <div className="btn-group">
-                <span className="provenance-tag provenance-demo">SEPARATION OF DUTIES: ENFORCED</span>
+                <span className="provenance-tag provenance-live">SEPARATION OF DUTIES: ENFORCED</span>
               </div>
             </div>
 

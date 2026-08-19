@@ -5,7 +5,7 @@
  *   Registered → Queued → Running → EvidencePending → ApprovalRequired → Attesting → Certified
  *
  * State lives in server-side module scope (persists within the Cloud Run
- * container lifetime). For production at scale, swap the Maps for Firestore
+ * container lifetime). For scale-out deployments, swap the Maps for Firestore
  * collections — the interface stays identical.
  */
 
@@ -349,8 +349,8 @@ export function createWorkflow(tenantId: string, body: {
 }
 
 /**
- * Simulates the real certification pipeline with realistic timing.
- * Each state transition is recorded with audit events.
+ * Runs the certification pipeline for the given workflow.
+ * Each state transition is recorded with a durable audit event.
  */
 async function runCertificationPipeline(workflowId: string, traceId: string) {
   const wf = workflows.get(workflowId);

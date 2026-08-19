@@ -23,16 +23,6 @@ export default function SignInPage() {
     setLoading(provider);
     setAuthError(null);
     try {
-      if (process.env.NODE_ENV === 'development') {
-        const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-        document.cookie = `sentinel-session=live; path=/; max-age=7200; SameSite=Strict${secure}`;
-        window.sessionStorage.setItem('sentinel-experience', 'live');
-        window.sessionStorage.setItem('sentinel-id-token', 'mock-token');
-        window.sessionStorage.setItem('sentinel-reviewer', 'dev@chimerasentinel.local');
-        router.push('/dashboard');
-        return;
-      }
-
       const selectedProvider = provider === 'google' ? googleProvider : githubProvider;
       const result = await signInWithPopup(auth, selectedProvider);
       const idToken = await result.user.getIdToken();
@@ -109,7 +99,7 @@ export default function SignInPage() {
             </>
           )}
 
-          <p className="signin-policy">Live Cloud mode verifies API health before allowing execution.</p>
+          <p className="signin-policy">Sentinel verifies API health on connection and rejects unverifiable data.</p>
         </div>
       </section>
     </main>

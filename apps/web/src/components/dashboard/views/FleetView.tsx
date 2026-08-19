@@ -110,31 +110,12 @@ export function FleetView(props: any) {
                   </div>
                   {experienceMode === 'replay' && (
                     <p className="replay-disclosure">
-                      Guided replay illustrates the release path. It does not grant production authority or replace live control-plane evidence.
+                      Guided walkthrough mode steps through the release path locally. It does not grant production authority or replace live control-plane evidence.
                     </p>
                   )}
                 </div>
 
                 <div className="experience-switch" role="group" aria-label="Mission Control data source">
-                  <button
-                    type="button"
-                    className={experienceMode === 'replay' ? 'active' : ''}
-                    aria-pressed={experienceMode === 'replay'}
-                    onClick={() => {
-                        setExperienceMode('replay');
-                        window.sessionStorage.setItem('sentinel-experience', 'replay');
-                        setApiError(null);
-                        setWorkflowState('Registered');
-                        setLiveWorkflowId(null);
-                        setApprovalGranted(false);
-                        setAttestationData(null);
-                        setVerifyResult(null);
-                        setLiveManifest(null);
-                      }}
-                  >
-                    Guided Replay
-                    <span>Deterministic judge walkthrough</span>
-                  </button>
                   <button
                     type="button"
                     className={experienceMode === 'live' ? 'active' : ''}
@@ -154,6 +135,25 @@ export function FleetView(props: any) {
                     Live Cloud
                     <span>{apiReachable ? 'Control plane connected' : 'Requires API connection'}</span>
                   </button>
+                  <button
+                    type="button"
+                    className={experienceMode === 'replay' ? 'active' : ''}
+                    aria-pressed={experienceMode === 'replay'}
+                    onClick={() => {
+                        setExperienceMode('replay');
+                        window.sessionStorage.setItem('sentinel-experience', 'replay');
+                        setApiError(null);
+                        setWorkflowState('Registered');
+                        setLiveWorkflowId(null);
+                        setApprovalGranted(false);
+                        setAttestationData(null);
+                        setVerifyResult(null);
+                        setLiveManifest(null);
+                      }}
+                  >
+                    Guided Walkthrough
+                    <span>Step-by-step workflow walkthrough</span>
+                  </button>
                 </div>
               </div>
 
@@ -164,15 +164,15 @@ export function FleetView(props: any) {
                     <strong>What this agent may do</strong>
                   </div>
                   <span className={`connection-state ${apiReachable ? 'is-live' : ''}`}>
-                    <Cloud size={14} aria-hidden="true" />
-                    {experienceMode === 'replay'
-                      ? 'Illustrative replay'
-                      : apiReachable === null
-                        ? 'Connecting'
-                        : apiReachable
-                          ? 'Cloud API live'
-                          : 'Cloud API offline'}
-                  </span>
+                      <Cloud size={14} aria-hidden="true" />
+                      {experienceMode === 'replay'
+                        ? 'Guided walkthrough mode'
+                        : apiReachable === null
+                          ? 'Connecting'
+                          : apiReachable
+                            ? 'Cloud API live'
+                            : 'Cloud API offline'}
+                    </span>
                 </div>
 
                 <div className="authority-diff">
