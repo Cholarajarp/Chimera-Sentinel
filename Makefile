@@ -1,4 +1,4 @@
-.PHONY: all check test build lint format unit contract corpus-validate smoke-live submission-check \
+.PHONY: all check test build lint format unit contract corpus-validate smoke-live release-check \
         run-mcp run-api run-worker run-certifier run-web verify-demo bootstrap clean scan
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -174,28 +174,26 @@ scan:
 	@echo "=== Scan complete ==="
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Pre-submission checklist
+# Release checklist
 # ─────────────────────────────────────────────────────────────────────────────
 
-## Full pre-submission checklist — run before hackathon deadline
-submission-check: check lint corpus-validate verify-demo scan
+## Full release checklist — run before promoting to production
+release-check: check lint corpus-validate verify-demo scan
 	@echo ""
-	@echo "=== Submission Checklist ==="
+	@echo "=== Release Checklist ==="
 	@echo ""
-	@echo "[Code Quality]"
+	@echo "[Automated gates]"
 	@echo "  ✓ cargo check passed"
 	@echo "  ✓ clippy (deny warnings) passed"
 	@echo "  ✓ corpus 80-case validation passed"
-	@echo "  ✓ demo attestation verifies offline"
+	@echo "  ✓ sample attestation verifies offline"
 	@echo ""
-	@echo "[Manual checks required before submission]"
+	@echo "[Manual checks required before production deploy]"
 	@echo "  □ terraform apply completed successfully"
 	@echo "  □ bash infra/scripts/setup-managed-agents.sh ran without errors"
 	@echo "  □ make smoke-live SENTINEL_API_URL=https://your-cloud-run-url passed"
 	@echo "  □ Web console loads and shows PROVENANCE: LIVE from real API"
-	@echo "  □ 4-minute demo video recorded and uploaded"
 	@echo "  □ README.md links to live Cloud Run URLs"
-	@echo "  □ NOTICE.md clean-room disclosure is present"
 	@echo ""
 	@echo "Run 'make smoke-live SENTINEL_API_URL=<url>' to validate the live stack."
 

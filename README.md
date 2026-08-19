@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Enterprise AI Agent Admission Control &amp; Attestation Platform</strong><br/>
-  <em>Google Cloud Agentic Cinema Hackathon 2026 — IBM Bob Track</em>
+  <em>Enterprise AI Agent Admission Control &amp; Attestation Platform</em>
 </p>
 
 <p align="center">
@@ -388,6 +388,7 @@ make submission-check   # Full checklist before deadline
 
 | Document | Description |
 |---|---|
+| [`SETUP.md`](SETUP.md) | **Start here** — end-to-end input flow, service map, how to submit a real agent |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Complete system architecture, threat model, and data flows |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Step-by-step GCP deployment guide |
 | [`SECURITY.md`](SECURITY.md) | Security policy and vulnerability reporting |
@@ -402,7 +403,7 @@ make submission-check   # Full checklist before deadline
 - The 80-case evaluation corpus is **synthetic** — it does not prove universal agent safety
 - Evaluation results are reported as exact fractions (e.g., `0/80` unauthorized releases) with binomial confidence bounds — **not** "zero risk"
 - Model Armor detection is not assumed perfect; defense-in-depth ensures Gateway/Oracle remain backup controls
-- Latency and cost figures are from demo-scale loads and should not be generalized to enterprise scale
+- Latency and cost figures are from initial validation runs and should be benchmarked against production-scale workloads before capacity planning
 - Cloud KMS key management follows Google Cloud best practices but has not been independently audited
 
 ---
@@ -419,6 +420,6 @@ Licensed under the Apache License, Version 2.0
 ---
 
 <p align="center">
-  <strong>Built with 🦁 for the Google Cloud Agentic Cinema Hackathon 2026</strong><br/>
-  <em>IBM Bob Track</em>
+  <strong>Chimera Sentinel — Enterprise AI Agent Admission Control</strong><br/>
+  <em>Built with IBM Bob</em>
 </p>

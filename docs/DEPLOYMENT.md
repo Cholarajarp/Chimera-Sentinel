@@ -31,7 +31,6 @@ node --version && pnpm --version
 ## Step 1 — Create the GCP project
 
 ```bash
-# This repository is configured for the existing hackathon project.
 export PROJECT_ID=chimera-sentinel
 export REGION=us-central1
 
@@ -166,10 +165,10 @@ make smoke-live SENTINEL_API_URL=$SENTINEL_API_URL GOOGLE_CLOUD_PROJECT=$PROJECT
 
 ---
 
-## Step 8 — Seed demo candidate + run certification
+## Step 8 — Register a candidate and run certification
 
 ```bash
-# Seed a demo AP agent candidate
+# Register a real AP agent candidate via the control plane API
 cargo run --bin sentinelctl -- seed \
   --api-url "$SENTINEL_API_URL" \
   --tenant 00000000-0000-0000-0000-000000000001
@@ -177,33 +176,16 @@ cargo run --bin sentinelctl -- seed \
 # Open the web console
 WEB_URL=$(terraform -chdir=infra/terraform output -raw web_url)
 echo "Web console: $WEB_URL"
-# Open $WEB_URL in your browser
-# Click "Start Flagship Certification Run" — this now hits the real API
+# Sign in and navigate to the Certification tab to start a certification run
 ```
 
 ---
 
-## Step 9 — Run the pre-submission checklist
+## Step 9 — Run the release checklist
 
 ```bash
-make submission-check
+make release-check
 ```
-
----
-
-## Step 10 — Record the 4-minute demo video
-
-Screen-record the web console showing:
-1. **Fleet Posture tab** — live KPI cards (fleet health, attestations, blocked escapes = 0)
-2. **Candidate ABOM tab** — agent bill of materials with Google managed resource refs
-3. **Certification Timeline tab** — click "Start Flagship Certification Run", watch states progress
-4. **80-Case Matrix tab** — filter by category, click "Inspect" on a blocked case
-5. **Reviewer Approval tab** — try "Candidate Owner" (blocked by SoD), switch to "Security Reviewer", authorize
-6. **Evidence Manifest tab** — SHA-256 content-addressed objects
-7. **KMS Attestation Verifier tab** — click "Simulate 1-Byte Tamper" to show it fails, reset
-8. **Cloud Trace tab** — W3C traceparent waterfall
-
-Upload the video and include the URL in your submission.
 
 ---
 
@@ -218,7 +200,7 @@ terraform -chdir=infra/terraform output
 | `control_plane_url` | REST API — set as `SENTINEL_API_URL` |
 | `web_url` | Public web console |
 | `adk_certifier_url` | Internal ADK certifier |
-| `mock_erp_url` | Internal Enterprise ERP Adapter |
+| `erp_adapter_url` | Internal Enterprise ERP Adapter |
 | `kms_key` | KMS key resource name |
 | `evidence_bucket` | GCS evidence archive |
 

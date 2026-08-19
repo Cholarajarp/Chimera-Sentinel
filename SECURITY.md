@@ -60,7 +60,7 @@ all result in blocked admission — never silent fallback or degraded-mode appro
 
 ## Known Limitations
 
-- This is a hackathon project and has not undergone formal security audit
+- This system has not undergone a formal third-party security audit
 - The evaluation corpus is synthetic and does not claim universal agent safety
 - Cloud KMS key management follows Google Cloud best practices but has not been
   independently certified
