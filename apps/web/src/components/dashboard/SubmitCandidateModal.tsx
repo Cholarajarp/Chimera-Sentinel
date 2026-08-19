@@ -48,7 +48,7 @@ export const SubmitCandidateModal: React.FC<SubmitCandidateModalProps> = ({ isOp
 
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || \`Status \${res.status}\`);
+        throw new Error(text || `Status ${res.status}`);
       }
 
       onSuccess();
