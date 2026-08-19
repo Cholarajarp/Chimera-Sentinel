@@ -367,22 +367,19 @@ pub mod artifact_registry {
             .get("shortDescription")
             .and_then(|s| s.as_str())
             .filter(|s| s.contains("CVE") || !s.is_empty())
-            .map(str::to_string)
-            .unwrap_or_else(|| {
+            .map_or_else(|| {
                 occurrence
                     .get("name")
                     .and_then(|n| n.as_str())
-                    .map(str::to_string)
-                    .unwrap_or_else(|| "unknown".to_string())
-            });
+                    .map_or_else(|| "unknown".to_string(), str::to_string)
+            }, str::to_string);
 
         let title = occurrence
             .get("packageIssue")
             .and_then(|p| p.get(0))
             .and_then(|p| p.get("affectedPackage"))
             .and_then(|p| p.as_str())
-            .map(str::to_string)
-            .unwrap_or_else(|| cve_id.clone());
+            .map_or_else(|| cve_id.clone(), str::to_string);
 
         let long_description = vuln
             .get("longDescription")
@@ -392,7 +389,7 @@ pub mod artifact_registry {
         let pkg = occurrence
             .get("packageIssue")
             .and_then(|p| p.get(0))
-            .map(|issue| {
+            .map_or_else(|| long_description.clone(), |issue| {
                 let pkg_name = issue
                     .get("affectedPackage")
                     .and_then(|p| p.as_str())
@@ -410,8 +407,7 @@ pub mod artifact_registry {
                 format!(
                     "Package={pkg_name} installed={pkg_version} fixed={fixed_version} — {long_description}"
                 )
-            })
-            .unwrap_or_else(|| long_description);
+            });
 
         Vulnerability {
             id: cve_id,
