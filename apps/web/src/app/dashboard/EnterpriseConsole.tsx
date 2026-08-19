@@ -920,7 +920,25 @@ export default function EnterpriseConsole() {
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
   }, [allCases, verifyResult]);
 
+  const contextValue = {
+    activeTab, setActiveTab, experienceMode, setExperienceMode, workflowState, setWorkflowState,
+    isRunningSim, setIsRunningSim, isTampered, setIsTampered, selectedCase, setSelectedCase,
+    caseDialogRef, searchQuery, setSearchQuery, splitFilter, setSplitFilter, categoryFilter, setCategoryFilter,
+    corpusPage, setCorpusPage, corpus, setCorpus, corpusStatus, setCorpusStatus, corpusError, setCorpusError,
+    reviewerRole, setReviewerRole, approvalGranted, setApprovalGranted, expiryDays, setExpiryDays,
+    reviewerPrincipal, setReviewerPrincipal, candidates, setCandidates, auditEvents, setAuditEvents,
+    selectedRevisionId, setSelectedRevisionId, liveWorkflowId, setLiveWorkflowId, apiError, setApiError,
+    fleetPosture, setFleetPosture, liveWorkflows, setLiveWorkflows, attestationData, setAttestationData,
+    liveManifest, setLiveManifest, verifyResult, setVerifyResult, apiReachable, setApiReachable,
+    allCases, workflowByRevision, isLiveConnected, selectedCandidate, priorRevision, correlatedTraces,
+    revisionDiff, filteredCases, categoryOptions, corpusPageCount, corpusStart, paginatedCases, steps,
+    currentStepIdx, isCertified, isApprovalReady, isLiveCertified, nextProof, missionStatus, cloudProvenanceClass,
+    formatCurrency, riskClass, shortDigest, auditSeverity, handleExportReport, handleStartCertification,
+    liveFleetPosture, handleCaseSimulation, handleOpenCase, handleStartPolicyDraft, handleExecuteManualApproval, handleGrantApproval, handleDurabilityReread, workerRestartMessage, setWorkerRestartMessage, VERIFICATION_CHECKS, isElevatedCapability, CORPUS_PAGE_SIZE
+  };
+
   return (
+    <DashboardProvider value={contextValue}>
     <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100 font-sans antialiased selection:bg-emerald-500/30">
       
       <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} handleExportReport={handleExportReport} />
@@ -1007,5 +1025,6 @@ export default function EnterpriseConsole() {
         </div>
       </main>
     </div>
+    </DashboardProvider>
   );
 }
