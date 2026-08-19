@@ -246,7 +246,6 @@ resource "google_cloud_run_v2_service" "control_plane" {
     scaling {
       min_instance_count = var.hot_path_min_instances
       max_instance_count = 1
-      max_instance_count = 1
     }
 
     containers {
@@ -418,7 +417,6 @@ resource "google_cloud_run_v2_service" "adk_certifier" {
     scaling {
       min_instance_count = var.hot_path_min_instances
       max_instance_count = 1
-      max_instance_count = 1
     }
 
     containers {
@@ -503,7 +501,6 @@ resource "google_cloud_run_v2_service" "mock_erp" {
     scaling {
       min_instance_count = var.hot_path_min_instances
       max_instance_count = 1
-      max_instance_count = 1
     }
 
     containers {
@@ -553,7 +550,6 @@ resource "google_cloud_run_v2_service" "web" {
       # hot_path_min_instances defaults to 0 (zero idle cost).
       # Set to 1 only when presenting a live demo to avoid cold-start latency.
       min_instance_count = var.hot_path_min_instances
-      max_instance_count = 1
       max_instance_count = 1
     }
 
