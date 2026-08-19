@@ -10,14 +10,28 @@ jobs:
   deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
+    # Workload Identity Federation requires the GitHub-issued OIDC token, which
+    # actions can only request via the `id-token` permission. `contents: read`
+    # is needed for checkout. Keep this the minimum-privilege grant.
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Authenticate to Google Cloud
+      - name: Authenticate to Google Cloud (Workload Identity Federation)
+        # Retired the long-lived GCP_SA_KEY in favor of short-lived OIDC token
+        # exchange. Requires two repository secrets to be configured:
+        #   GCP_WIF_PROVIDER   — projects/<P>/locations/global/workloadIdentityPools/<pool>/providers/github
+        #   GCP_SERVICE_ACCOUNT — <sa>@<P>.iam.gserviceaccount.com
+        # On the GCP side grant roles/iam.workloadIdentityUser on that service
+        # account to the pool principal, scoped to the deploying branch, e.g.
+        #   repo:<org>/<repo>:ref:refs/heads/main
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          workload_identity_provider: '${{ secrets.GCP_WIF_PROVIDER }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}'
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
@@ -31,15 +45,22 @@ jobs:
         env:
           PROJECT_ID: chimera-sentinel
           REGION: us-east1
+          # Inject Terraform variables WITHOUT editing the tfvars file.
+          # Terraform reads TF_VAR_<name> env vars; precedence is -var/-var-file
+          # > TF_VAR_* > terraform.tfvars > default. We keep the example-file
+          # copy below so deploy.sh's get_tfvar helper (grep on the file) still
+          # finds the Firebase values to bake into the Next.js web image. We no
+          # longer mutate the file with sed — overrides are environment-driven
+          # and unambiguous, removing a brittle string-replacement failure mode.
+          TF_VAR_project_id: chimera-sentinel
+          TF_VAR_region: us-east1
+          # Force warm instances to 0 so services cold-start on first request
+          # (cost-free at idle). The variable is validated to 0|1 in variables.tf.
+          TF_VAR_hot_path_min_instances: '0'
         run: |
-          # Copy your local tfvars to the action runner
+          # Seed terraform.tfvars from the checked-in example so the web image
+          # build (get_tfvar firebase_*) has values to read. We intentionally do
+          # NOT sed-mutate it; overrides come from TF_VAR_* above.
           cp infra/terraform/terraform.tfvars.example infra/terraform/terraform.tfvars
-          
-          # Force minimum instances to 0 to prevent billing charges
-          sed -i 's/hot_path_min_instances = 1/hot_path_min_instances = 0/' infra/terraform/terraform.tfvars
-          
-          # Add any other required tfvars replacements if needed
-          sed -i "s/^project_id.*/project_id = \"${PROJECT_ID}\"/" infra/terraform/terraform.tfvars
-          
-          # Run the deploy script
+
           bash infra/scripts/deploy.sh

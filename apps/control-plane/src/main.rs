@@ -49,7 +49,7 @@ use sentinel_contracts::{
 };
 use sentinel_domain::{
     attestation::AttestationMetadata,
-    candidate::CandidateRevision,
+    candidate::{CandidateRevision, ScanResponse},
     evidence::{Approval, EvidenceManifestRef},
     finding::Finding,
     ids::{ApprovalId, RevisionId, TenantId, WorkflowId},
@@ -57,7 +57,7 @@ use sentinel_domain::{
     AuditEvent, AuditEventType,
 };
 use sentinel_metrics::{gather_metrics, HTTP_REQUESTS};
-use sentinel_observability::init_tracing;
+use sentinel_observability::init_telemetry;
 use sentinel_persistence::{
     firestore::FirestoreStore, memory::InMemoryStore, ApprovalRepository, AttestationRepository,
     AuditRepository, CandidateRepository, EvidenceRepository, FindingRepository,
@@ -304,8 +304,17 @@ async fn main() -> anyhow::Result<()> {
             ControlPlaneConfig::default()
         }
     };
-    sentinel_config::init_logging(&config.observability)?;
-    let _guard = init_tracing(&config.observability.otel_service_name);
+    // Unified telemetry bootstrap: structured JSON logging (always on) plus
+    // optional OTLP export to Cloud Trace when a real `otel_endpoint` is
+    // configured. The GCP project becomes the `gcp.project_id` resource
+    // attribute on exported spans so they land in the right Cloud Trace
+    // project. Do NOT call `sentinel_config::init_logging` here — owning a
+    // single global subscriber here avoids the double-init race.
+    let _guard = init_telemetry(
+        &config.observability,
+        Some(&config.google_cloud.firestore_project),
+    )
+    .map_err(anyhow::Error::msg)?;
 
     info!("Starting Chimera Sentinel Control Plane v0.1.0");
     info!("Server addr: {}", args.addr);
@@ -390,6 +399,13 @@ async fn main() -> anyhow::Result<()> {
             post(handle_create_candidate).get(handle_list_candidates),
         )
         .route("/v1/candidates/:revision_id", get(handle_get_candidate))
+        // On-Demand vulnerability scanning for a candidate's container image.
+        // Returns live CVEs (provenance: LIVE) when GCP creds are available, an
+        // honest empty result (provenance: LOCAL) when they are not.
+        .route(
+            "/v1/candidates/:revision_id/scan",
+            get(handle_scan_candidate),
+        )
         // Workflow lifecycle
         .route(
             "/v1/workflows",
@@ -645,6 +661,106 @@ async fn handle_get_candidate(
     {
         Some(c) => Ok((StatusCode::OK, Json(CandidateDetailResponse::from(c)))),
         None => Err(not_found("Candidate revision not found")),
+    }
+}
+
+/// `GET /v1/candidates/:revision_id/scan` — On-Demand vulnerability scan.
+///
+/// Scans the candidate agent's container image via the GCP On-Demand Scanning
+/// API (`ondemandscanning.googleapis.com`). Behavior is strictly honest:
+/// - Without live GCP services enabled, OR when no GCP access token is
+///   reachable (local/CI), returns an empty [`ScanResponse`] with
+///   [`Provenance::Local`] — never fabricates CVEs.
+/// - When the candidate carries no resolvable container-image reference (and
+///   no `SENTINEL_SCAN_IMAGE` override is set), returns an empty result with
+///   `status = "NO_SCANNABLE_IMAGE"` and [`Provenance::Local`].
+/// - When a real scan runs, returns upstream CVEs with [`Provenance::Live`].
+/// - A live scan that fails upstream is surfaced as 503 (Service Unavailable)
+///   rather than a misleading "clean" result.
+async fn handle_scan_candidate(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(revision_id_str): Path<String>,
+) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+    use sentinel_doc_main::candidate::ScanResponse as _; // no-op type hint
+    let tenant_id = extract_tenant(&headers)?;
+    let rev_id = RevisionId(revision_id_str.to_string());
+
+    let candidate = match CandidateRepository::get(&*state.store, tenant_id, &rev_id)
+        .await
+        .map_err(|e| internal(e))?
+    {
+        Some(c) => c,
+        None => return Err(not_found("Candidate revision not found")),
+    };
+
+    // ── Honest LOCAL fallback (no GCP creds / not live) ──────────────────────
+    let local_empty = || ScanResponse {
+        status: "LOCAL".to_string(),
+        provenance: sentinel_domain::provenance::Provenance::Local,
+        vulnerabilities: Vec::new(),
+    };
+
+    if !state.config.google_cloud.use_live_services {
+        return Ok((StatusCode::OK, Json(local_empty())));
+    }
+
+    // Reach the metadata server for a short-lived access token. Failure means
+    // we are not on GCE / lack on-demand-scanning scope → honest LOCAL.
+    let access_token = match metadata_access_token().await {
+        Ok(t) => t,
+        Err(e) => {
+            warn!("Vulnerability scan downgraded to LOCAL (no GCP creds): {e}");
+            return Ok((StatusCode::OK, Json(local_empty())));
+        }
+    };
+
+    // Resolve the image to scan. Prefer an operator override, then an
+    // Artifact/GCR Registry image reference carried by the ABOM. If neither is
+    // resolvable, return an honest LOCAL empty result — never fabricate data.
+    let resource_uri = std::env::var("SENTINEL_SCAN_IMAGE")
+        .ok()
+        .filter(|s| !s.trim().is_empty())
+        .or_else(|| {
+            let r = &candidate.abom.registry_resource;
+            (r.contains("pkg.dev") || r.contains("gcr.io")).then(|| r.clone())
+        });
+
+    let Some(resource_uri) = resource_uri else {
+        return Ok((
+            StatusCode::OK,
+            Json(ScanResponse {
+                status: "NO_SCANNABLE_IMAGE".to_string(),
+                provenance: sentinel_domain::provenance::Provenance::Local,
+                vulnerabilities: Vec::new(),
+            }),
+        ));
+    };
+
+    let project = std::env::var("GOOGLE_CLOUD_PROJECT")
+        .unwrap_or_else(|_| state.config.google_cloud.firestore_project.clone());
+    let location = std::env::var("GOOGLE_CLOUD_REGION").unwrap_or_else(|_| "us-east1".to_string());
+
+    let target = sentinel_google_adapters::artifact_registry::ScanTarget {
+        project: &project,
+        location: &location,
+        resource_uri: &resource_uri,
+    };
+    match sentinel_google_adapters::artifact_registry::scan(target, &access_token).await {
+        Ok(scan) => {
+            info!(
+                "Live vulnerability scan for candidate {} reported {} CVEs",
+                rev_id,
+                scan.vulnerabilities.len()
+            );
+            Ok((StatusCode::OK, Json(scan)))
+        }
+        Err(e) => {
+            warn!("On-Demand vulnerability scan failed for {rev_id}: {e}");
+            Err(service_unavailable(format!(
+                "vulnerability scan failed: {e}"
+            )))
+        }
     }
 }
 

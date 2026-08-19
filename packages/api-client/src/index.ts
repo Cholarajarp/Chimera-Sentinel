@@ -78,6 +78,21 @@ export interface SubmitApprovalRequest {
   duration_seconds: number;
 }
 
+export interface Vulnerability {
+  id: string;
+  title: string;
+  severity: string;
+  description: string;
+}
+
+export type Provenance = 'LIVE' | 'REPLAY' | 'SYSTEM_TEST' | 'INFERRED' | 'LOCAL';
+
+export interface ScanResponse {
+  status: string;
+  provenance: Provenance;
+  vulnerabilities: Vulnerability[];
+}
+
 export class SentinelClient {
   constructor(private baseUrl: string = 'http://localhost:8080', private tenantId?: string) {}
 
@@ -134,5 +149,9 @@ export class SentinelClient {
         environment,
       }),
     });
+  }
+
+  async getScan(revisionId: string): Promise<ScanResponse> {
+    return this.request(`/v1/candidates/${revisionId}/scan`);
   }
 }

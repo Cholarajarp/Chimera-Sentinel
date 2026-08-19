@@ -28,7 +28,7 @@ use sentinel_domain::{
     ids::{CaseId, CaseRunId, PrincipalId, TenantId, WorkflowId},
     ledger::{LedgerAction, LedgerEntry, LedgerSnapshot},
 };
-use sentinel_observability::init_tracing;
+use sentinel_observability::init_telemetry;
 
 #[derive(Parser)]
 #[command(name = "sentinel-enterprise-erp-adapter")]
@@ -109,8 +109,17 @@ async fn main() -> anyhow::Result<()> {
     let config: EnterpriseErpConfig =
         load_config(&args.config).map_err(|e| anyhow::anyhow!("Failed to load config: {}", e))?;
 
-    sentinel_config::init_logging(&config.observability)?;
-    let _guard = init_tracing(&config.observability.otel_service_name);
+    // The Firestore project is selected from the environment (the same project
+    // the adapter operates on). Reuse it as the `gcp.project_id` resource
+    // attribute for Cloud Trace so exported spans land in the right project.
+    let project_id =
+        std::env::var("GOOGLE_CLOUD_PROJECT").unwrap_or_else(|_| "chimera-sentinel".to_string());
+
+    // Unified telemetry bootstrap: JSON logging (always) + OTLP export to
+    // Cloud Trace when a real `otel_endpoint` is configured. Hold the guard
+    // for the process lifetime so spans flush on shutdown.
+    let _guard =
+        init_telemetry(&config.observability, Some(&project_id)).map_err(anyhow::Error::msg)?;
 
     info!("Starting Chimera Sentinel Enterprise ERP Adapter MCP Server");
     info!(
@@ -118,8 +127,6 @@ async fn main() -> anyhow::Result<()> {
         config.ledger.enforce_zero_unauthorized
     );
 
-    let project_id =
-        std::env::var("GOOGLE_CLOUD_PROJECT").unwrap_or_else(|_| "chimera-sentinel".to_string());
     let db = Arc::new(FirestoreClient::new(project_id));
 
     let state = AppState {

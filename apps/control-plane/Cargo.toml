@@ -22,6 +22,7 @@ sentinel-evidence = { workspace = true }
 sentinel-attestation = { workspace = true }
 sentinel-persistence = { workspace = true }
 sentinel-observability = { workspace = true }
+sentinel-google-adapters = { workspace = true }
 sentinel-config = { workspace = true }
 sentinel-metrics = { workspace = true }
 axum.workspace = true

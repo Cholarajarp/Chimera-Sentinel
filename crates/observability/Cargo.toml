@@ -14,13 +14,16 @@ workspace = true
 sentinel-domain = { workspace = true }
 tracing.workspace = true
 tracing-subscriber.workspace = true
+# OpenTelemetry stack — non-optional so `cargo check --workspace` (CI) actually
+# compiles the exporter instead of hiding a broken gated path. Runtime export
+# is enabled only when a real OTLP endpoint is configured (see init_telemetry);
+# when no endpoint is set, only stdout JSON tracing is active (LOCAL/CI).
 opentelemetry.workspace = true
 opentelemetry_sdk.workspace = true
-# Google Cloud Trace exporter — enable with feature flag so LOCAL mode compiles without GCP
-opentelemetry-otlp = { version = "0.27", features = ["grpc-tonic", "tls", "tls-roots"], optional = true }
-tracing-opentelemetry = { version = "0.28", optional = true }
-serde.workspace = true
-serde_json.workspace = true
+opentelemetry-otlp = { version = "0.27", features = ["grpc-tonic", "tls", "tls-roots"] }
+tracing-opentelemetry = "0.28"
 
 [features]
-cloud-trace = ["opentelemetry-otlp", "tracing-opentelemetry"]
+# Kept for backward compatibility with existing config/Dockerfiles that reference
+# it; the exporter is now always compiled and gated at runtime instead.
+cloud-trace = []

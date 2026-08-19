@@ -33,9 +33,29 @@ import { VulnerabilityView } from '@/components/dashboard/views/VulnerabilityVie
 
 
 const API_BASE = '/api';
+
 const TENANT_ID = '00000000-0000-0000-0000-000000000001';
+
 const CORPUS_PAGE_SIZE = 20;
+
 const MAX_POLL_ATTEMPTS = 90;
+
+
+
+interface Vulnerability {
+  id: string;
+  title: string;
+  severity: string;
+  description: string;
+}
+
+type Provenance = 'LIVE' | 'REPLAY' | 'SYSTEM_TEST' | 'INFERRED' | 'LOCAL';
+
+interface ScanResponse {
+  status: string;
+  provenance: Provenance;
+  vulnerabilities: Vulnerability[];
+}
 
 type WorkflowStep =
   | 'Registered'
@@ -310,6 +330,10 @@ export default function EnterpriseConsole() {
   // provenance: null = connecting, true = live API reachable, false = unreachable
   const [apiReachable, setApiReachable] = useState<boolean | null>(null);
   const [workerRestartMessage, setWorkerRestartMessage] = useState<string | null>(null);
+  // Vulnerability scan state
+  const [scanData, setScanData] = useState<ScanResponse | null>(null);
+  const [scanStatus, setScanStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [scanError, setScanError] = useState<string | null>(null);
 
   useEffect(() => {
     const savedMode = window.sessionStorage.getItem('sentinel-experience');
@@ -351,6 +375,26 @@ export default function EnterpriseConsole() {
       }
     } catch (error) {
       setApiError(error instanceof Error ? error.message : String(error));
+    }
+  }, []);
+
+  // Fetch vulnerability scan for the selected candidate revision.
+  const fetchScan = useCallback(async (revisionId: string) => {
+    setScanStatus('loading');
+    setScanError(null);
+    try {
+      const headers = { 'X-Tenant-ID': TENANT_ID };
+      const response = await fetch(`${API_BASE}/v1/candidates/${revisionId}/scan`, { headers });
+      if (!response.ok) {
+        throw new Error(`Scan request failed with HTTP ${response.status}`);
+      }
+      const data = await response.json() as ScanResponse;
+      setScanData(data);
+      setScanStatus('ready');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setScanError(message);
+      setScanStatus('error');
     }
   }, []);
 
@@ -459,11 +503,25 @@ export default function EnterpriseConsole() {
 
   const selectedCandidate = useMemo(
     () => candidates.find(c => c.revision_id === selectedRevisionId) ?? candidates[0] ?? null,
+
     [candidates, selectedRevisionId],
+
   );
 
+
+
+  // Load vulnerability scan when on the vulnerability tab and a candidate is selected.
+  useEffect(() => {
+    if (experienceMode !== 'live' || !apiReachable) return;
+    if (activeTab === 'vulnerability' && selectedCandidate?.revision_id) {
+      void fetchScan(selectedCandidate.revision_id);
+    }
+  }, [activeTab, apiReachable, experienceMode, fetchScan, selectedCandidate]);
+
   // Previous registered revision of the same agent, so the capability diff
+
   // compares two real ABOMs instead of an assumed baseline.
+
   const priorRevision = useMemo(() => {
     if (!selectedCandidate) return null;
     return (
@@ -1008,6 +1066,10 @@ export default function EnterpriseConsole() {
     handleDurabilityReread,
     workerRestartMessage,
     setWorkerRestartMessage,
+    scanData,
+    scanStatus,
+    scanError,
+    fetchScan,
     VERIFICATION_CHECKS,
     isElevatedCapability,
     CORPUS_PAGE_SIZE
@@ -1024,7 +1086,7 @@ export default function EnterpriseConsole() {
         {/* ── Top Action Bar ───────────────────────────────────────────────── */}
         <div
           className="flex-none h-[72px] px-6 flex items-center justify-between z-40 flex-shrink-0"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'var(--bg-secondary)' }}
+          style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-secondary)' }}
         >
           {/* Left: status pill + workflow ID + tenant */}
           <div className="flex items-center gap-4 min-w-0">
@@ -1048,13 +1110,13 @@ export default function EnterpriseConsole() {
             {liveWorkflowId && (
               <code
                 className="px-2 py-1 rounded text-[11px] font-mono truncate max-w-[240px] hidden md:block flex-shrink-0"
-                style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid rgba(255,255,255,0.07)' }}
+                style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
               >
                 {liveWorkflowId}
               </code>
             )}
 
-            <div className="hidden lg:flex items-center pl-4 flex-shrink-0" style={{ borderLeft: '1px solid rgba(255,255,255,0.07)' }}>
+            <div className="hidden lg:flex items-center pl-4 flex-shrink-0" style={{ borderLeft: '1px solid var(--border-subtle)' }}>
               <span className="text-[10px] font-mono font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--text-muted)' }}>
                 tenant · {TENANT_ID.slice(0, 18)}…
               </span>

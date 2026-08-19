@@ -15,7 +15,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use time::OffsetDateTime;
 use tokio::net::TcpListener;
-use tracing::{error, info, warn};
+use tracing::{error, info, warn, Instrument};
 use uuid::Uuid;
 
 use sentinel_attestation::{build_attestation_payload, sign_attestation};
@@ -34,7 +34,7 @@ use sentinel_domain::{
 };
 use sentinel_evidence::{sha256_digest, EvidenceManifestBuilder};
 use sentinel_google_adapters::{gateway, model_armor};
-use sentinel_observability::init_tracing;
+use sentinel_observability::init_telemetry;
 use sentinel_persistence::{
     firestore::FirestoreStore, memory::InMemoryStore, ApprovalRepository, AttestationRepository,
     AuditRepository, CandidateRepository, EvidenceRepository, FindingRepository,
@@ -270,11 +270,15 @@ async fn main() -> anyhow::Result<()> {
     let config: WorkflowWorkerConfig =
         load_config(&args.config).map_err(|e| anyhow::anyhow!("Failed to load config: {}", e))?;
 
-    // Initialize structured logging
-    sentinel_config::init_logging(&config.observability)?;
-
-    // Initialize tracing
-    let _guard = init_tracing(&config.observability.otel_service_name);
+    // Unified telemetry bootstrap: JSON logging (always) + OTLP export to
+    // Cloud Trace when a real `otel_endpoint` is configured. The GCP project
+    // becomes the `gcp.project_id` resource attribute on exported spans. Hold
+    // the guard for the process lifetime so spans flush on shutdown.
+    let _guard = init_telemetry(
+        &config.observability,
+        Some(&config.google_cloud.firestore_project),
+    )
+    .map_err(anyhow::Error::msg)?;
 
     info!("Starting Chimera Sentinel Workflow Worker");
     info!("Config loaded from: {}", args.config);
@@ -582,6 +586,40 @@ async fn execute_workflow_certification(
     cert_config: &sentinel_config::CertificationConfig,
     worker_id: &str,
 ) -> Result<(), String> {
+    // W3C traceparent trace-id: a fresh 32-hex randomness per workflow so every
+    // certification run contributes its own distributed trace instead of sharing
+    // a static example ID. The span carries `trace_id` and `workflow_id` so each
+    // exported Cloud Trace span correlates back to exactly one certification
+    // run (the same trace_id is sent to the ADK certifier in the eval request).
+    let trace_id = Uuid::new_v4().as_simple().to_string();
+    // Capture workflow_id as an owned value for the span so the span does not
+    // borrow `workflow` (`workflow` is passed mutably into the inner call).
+    let workflow_id = workflow.workflow_id.to_string();
+    let span = tracing::info_span!(
+        "certification",
+        trace_id = %trace_id,
+        workflow_id = %workflow_id,
+    );
+    execute_workflow_certification_inner(
+        store,
+        workflow,
+        google_config,
+        cert_config,
+        worker_id,
+        &trace_id,
+    )
+    .instrument(span)
+    .await
+}
+
+async fn execute_workflow_certification_inner(
+    store: &Arc<Store>,
+    workflow: &mut sentinel_domain::workflow::Workflow,
+    google_config: &sentinel_config::GoogleCloudConfig,
+    cert_config: &sentinel_config::CertificationConfig,
+    worker_id: &str,
+    trace_id: &str,
+) -> Result<(), String> {
     let now = OffsetDateTime::now_utc();
     let tenant_id = workflow.tenant_id;
     let candidate = CandidateRepository::get(&**store, tenant_id, &workflow.candidate_revision_id)
@@ -603,10 +641,6 @@ async fn execute_workflow_certification(
         .unwrap_or_else(|_| "http://localhost:8081".to_string());
 
     let is_live = google_config.use_live_services;
-    // W3C traceparent trace-id: a fresh 32-hex randomness per workflow so every
-    // certification run contributes its own distributed trace instead of sharing
-    // a static example ID.
-    let trace_id = Uuid::new_v4().as_simple().to_string();
 
     let eval_request = serde_json::json!({
         "tenant_id": tenant_id.to_string(),
@@ -616,7 +650,7 @@ async fn execute_workflow_certification(
         "case_ids": required_cases,
         "policy_pack_id": workflow.policy_pack_id,
         "corpus_version": workflow.corpus_version,
-        "trace_id": trace_id.clone(),
+        "trace_id": trace_id,
         "is_live": is_live,
     });
 
@@ -758,7 +792,7 @@ async fn execute_workflow_certification(
         gateway_decisions,
         approval: None,
         retest_results: Vec::new(),
-        trace_id: Some(trace_id),
+        trace_id: Some(trace_id.to_string()),
     };
 
     let ledger_before: LedgerSnapshot =
@@ -977,6 +1011,39 @@ async fn execute_workflow_retest(
     cert_config: &sentinel_config::CertificationConfig,
     worker_id: &str,
 ) -> Result<(), String> {
+    // W3C traceparent trace-id (32 hex). A fresh ID per retest keeps Cloud Trace
+    // spans distinct instead of reusing a static example string. The span carries
+    // `trace_id` and `workflow_id` so each retest's Cloud Trace span correlates
+    // back to exactly one run (the same trace_id is sent to the ADK certifier).
+    let trace_id = Uuid::new_v4().as_simple().to_string();
+    // Capture workflow_id as an owned value for the span so the span does not
+    // borrow `workflow` (`workflow` is passed mutably into the inner call).
+    let workflow_id = workflow.workflow_id.to_string();
+    let span = tracing::info_span!(
+        "retest",
+        trace_id = %trace_id,
+        workflow_id = %workflow_id,
+    );
+    execute_workflow_retest_inner(
+        store,
+        workflow,
+        google_config,
+        cert_config,
+        worker_id,
+        &trace_id,
+    )
+    .instrument(span)
+    .await
+}
+
+async fn execute_workflow_retest_inner(
+    store: &Arc<Store>,
+    workflow: &mut sentinel_domain::workflow::Workflow,
+    google_config: &sentinel_config::GoogleCloudConfig,
+    cert_config: &sentinel_config::CertificationConfig,
+    worker_id: &str,
+    trace_id: &str,
+) -> Result<(), String> {
     let now = OffsetDateTime::now_utc();
     let tenant_id = workflow.tenant_id;
     let candidate = CandidateRepository::get(&**store, tenant_id, &workflow.candidate_revision_id)
@@ -987,9 +1054,6 @@ async fn execute_workflow_retest(
 
     let adk_url = std::env::var("SENTINEL_ADK_CERTIFIER_URL")
         .unwrap_or_else(|_| "http://localhost:8081".to_string());
-    // W3C traceparent trace-id (32 hex). A fresh ID per retest keeps Cloud Trace
-    // spans distinct instead of reusing a static example string.
-    let trace_id = Uuid::new_v4().as_simple().to_string();
     let retest_request = serde_json::json!({
         "tenant_id": tenant_id.to_string(),
         "workflow_id": workflow.workflow_id.to_string(),

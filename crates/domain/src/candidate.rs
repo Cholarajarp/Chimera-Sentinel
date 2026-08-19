@@ -184,5 +184,11 @@ pub struct Vulnerability {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ScanResponse {
     pub status: String,
+    /// Provenance of the scan result:
+    /// - [`Provenance::Local`] — no GCP credentials / metadata-token available
+    ///   (local dev, CI, or a deployment without on-demand-scanning scope), so the
+    ///   result is an honest empty placeholder, never fabricated CVEs.
+    /// - [`Provenance::Live`] — produced by a live On-Demand Scanning API call.
+    pub provenance: Provenance,
     pub vulnerabilities: Vec<Vulnerability>,
 }

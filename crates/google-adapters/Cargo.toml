@@ -18,3 +18,5 @@ serde.workspace = true
 serde_json.workspace = true
 time.workspace = true
 reqwest.workspace = true
+# tokio is needed only for the On-Demand Scanning poll loop (tokio::time::sleep).
+tokio.workspace = true

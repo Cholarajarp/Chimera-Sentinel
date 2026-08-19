@@ -1618,6 +1618,7 @@ dependencies = [
  "sentinel-contracts",
  "sentinel-domain",
  "sentinel-evidence",
+ "sentinel-google-adapters",
  "sentinel-metrics",
  "sentinel-observability",
  "sentinel-persistence",
@@ -1695,6 +1696,7 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.20",
  "time",
+ "tokio",
 ]
 
 [[package]]
@@ -1718,8 +1720,6 @@ dependencies = [
  "opentelemetry-otlp",
  "opentelemetry_sdk",
  "sentinel-domain",
- "serde",
- "serde_json",
  "tracing",
  "tracing-opentelemetry",
  "tracing-subscriber",
