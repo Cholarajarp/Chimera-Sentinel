@@ -367,12 +367,15 @@ pub mod artifact_registry {
             .get("shortDescription")
             .and_then(|s| s.as_str())
             .filter(|s| s.contains("CVE") || !s.is_empty())
-            .map_or_else(|| {
-                occurrence
-                    .get("name")
-                    .and_then(|n| n.as_str())
-                    .map_or_else(|| "unknown".to_string(), str::to_string)
-            }, str::to_string);
+            .map_or_else(
+                || {
+                    occurrence
+                        .get("name")
+                        .and_then(|n| n.as_str())
+                        .map_or_else(|| "unknown".to_string(), str::to_string)
+                },
+                str::to_string,
+            );
 
         let title = occurrence
             .get("packageIssue")
