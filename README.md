@@ -10,7 +10,6 @@
 </p>
 
 <p align="center">
-  <a href="NOTICE.md"><img src="https://img.shields.io/badge/Lineage-Clean--Room-brightgreen?style=for-the-badge" alt="Clean-Room Project" /></a>
   <a href="Cargo.toml"><img src="https://img.shields.io/badge/Rust-1.92-DEA584?style=for-the-badge&logo=rust&logoColor=white" alt="Rust 1.92" /></a>
   <a href="docs/ARCHITECTURE.md"><img src="https://img.shields.io/badge/Google%20Cloud-Agentic%20Cinema-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white" alt="Google Cloud" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge" alt="Apache 2.0" /></a>
@@ -22,8 +21,7 @@
   <a href="#-system-architecture">Architecture</a> •
   <a href="#-google-cloud-integrations">GCP Integrations</a> •
   <a href="#-80-case-evaluation-corpus">Evaluation</a> •
-  <a href="#-deployment">Deployment</a> •
-  <a href="docs/PRODUCTION_EVALUATION.md">Demo Guide</a>
+  <a href="#-deployment">Deployment</a>
 </p>
 
 ---
@@ -392,12 +390,7 @@ make submission-check   # Full checklist before deadline
 |---|---|
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Complete system architecture, threat model, and data flows |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Step-by-step GCP deployment guide |
-| [`docs/PRODUCTION_EVALUATION.md`](docs/PRODUCTION_EVALUATION.md) | 80-case evaluation methodology, metrics, and demo script |
 | [`docs/HACKATHON_CHECKLIST.md`](docs/HACKATHON_CHECKLIST.md) | Submission requirements and rubric alignment |
-| [`docs/IMPLEMENTATION_PHASES.md`](docs/IMPLEMENTATION_PHASES.md) | Development roadmap and phase breakdowns |
-| [`docs/PRODUCT_BLUEPRINT.md`](docs/PRODUCT_BLUEPRINT.md) | Product vision and enterprise feature roadmap |
-| [`docs/VANGUARD_TO_SENTINEL.md`](docs/VANGUARD_TO_SENTINEL.md) | Prior-work evolution and clean-room boundary |
-| [`NOTICE.md`](NOTICE.md) | Clean-room disclosure and third-party licenses |
 | [`SECURITY.md`](SECURITY.md) | Security policy and vulnerability reporting |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Development setup and contribution guidelines |
 
