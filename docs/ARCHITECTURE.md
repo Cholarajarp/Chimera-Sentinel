@@ -7,7 +7,7 @@ Chimera Sentinel is a release admission and continuous assurance system for ente
 - **Rust control plane:** public APIs, authentication context, authorization, tenancy, candidate manifests, durable workflow, deterministic policy, evidence validation, approvals, revocation, attestation payload construction, KMS requests, and audit events.
 - **Python ADK certifier:** Google ADK/Gemini orchestration and managed-agent invocation only. It produces untrusted typed observations.
 - **Candidate agent:** isolated workload under test with a distinct Agent Identity.
-- **Enterprise ERP Adapter MCP service:** deterministic business fixture and side-effect oracle; the candidate cannot bypass its Gateway path.
+- **Enterprise ERP Adapter MCP service (IBM Bob Integration):** deterministic business fixture and side-effect oracle; the candidate cannot bypass its Gateway path.
 - **Next.js console:** a view/controller over APIs, never canonical state.
 
 Exact Google product names, availability, APIs, IAM roles, regions, and Gemini model identifiers evolve. Implementation must verify current official documentation before pinning dependencies or creating resources. No adapter may report `LIVE` until a real call and provider evidence succeed.
@@ -25,7 +25,7 @@ flowchart TB
     Candidate[Candidate agent]
     Armor[Model Armor]
     Gateway[Agent Gateway]
-    ERP[Enterprise ERP Adapter MCP service]
+    ERP["Enterprise ERP Adapter MCP service (IBM Bob Integration)"]
     Registry[Agent Registry]
     Identity[Agent Identity]
     Memory[Memory Bank]
