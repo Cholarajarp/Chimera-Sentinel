@@ -40,7 +40,7 @@ export function PolicyView(props: any) {
   return (
     <>
           <div id="policy-view" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="glass-panel action-banner bg-gradient-to-r from-indigo-900/20 to-slate-900">
+            <div className="panel action-banner">
               <div className="action-info">
                 <h2 className="flex items-center gap-2"><LockKeyhole className="text-indigo-400" /> Dynamic Policy Configuration</h2>
                 <p>Active policy rules enforced by the control plane for this tenant.</p>
@@ -53,7 +53,7 @@ export function PolicyView(props: any) {
             </div>
 
             {!isLiveConnected ? (
-              <div className="glass-panel corpus-placeholder" style={{ marginTop: '1.5rem' }}>
+              <div className="panel corpus-placeholder mt-6">
                 <h3>Policy configuration requires a live connection</h3>
                 <p>
                   Policy rules are enforced and stored by the control plane. Switch to Live Cloud to
@@ -61,43 +61,51 @@ export function PolicyView(props: any) {
                 </p>
               </div>
             ) : (
-            <div className="glass-panel abom-panel" style={{ marginTop: '1.5rem' }}>
+            <div className="panel abom-panel mt-6">
               <h4>Active Policy Rules — {corpus ? `policy pack: ${candidates[0]?.policy_pack_id ?? 'ap-agent-v1'}` : 'ap-agent-v1'}</h4>
               <p className="abom-panel-note">
                 These rules are read from the active policy pack bound to the candidate revision.
                 Changes require re-registration of the candidate with a new policy pack digest.
               </p>
-              <div className="space-y-4 mt-4">
-                 <div className="flex items-center justify-between p-5 border border-slate-700/50 rounded-xl bg-slate-800/40 backdrop-blur-sm shadow-inner transition-colors hover:border-slate-600">
+              <div className="flex flex-col gap-3 mt-4">
+                 <div className="flex items-center justify-between p-4 rounded-lg transition-all duration-200" style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'var(--bg-tertiary)' }}
+                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(0,228,155,0.2)')}
+                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}>
                     <div>
-                      <h5 className="font-semibold text-slate-200 tracking-wide text-sm">RULE-005-LEAST-PRIVILEGE-AGENCY</h5>
-                      <p className="text-xs text-slate-400 mt-1">Approval required before certifying any revision that requests payment-release capabilities</p>
+                      <h5 className="font-semibold text-[13px] tracking-wide" style={{ color: 'var(--text-primary)' }}>RULE-005-LEAST-PRIVILEGE-AGENCY</h5>
+                      <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Approval required before certifying any revision that requests payment-release capabilities</p>
                     </div>
-                    <span className="provenance-tag provenance-live">ENFORCED</span>
+                    <span className="provenance-tag provenance-live ml-4 flex-shrink-0">ENFORCED</span>
                  </div>
 
-                 <div className="flex items-center justify-between p-5 border border-slate-700/50 rounded-xl bg-slate-800/40 backdrop-blur-sm shadow-inner transition-colors hover:border-slate-600">
+                 <div className="flex items-center justify-between p-4 rounded-lg transition-all duration-200" style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'var(--bg-tertiary)' }}
+                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(0,228,155,0.2)')}
+                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}>
                     <div>
-                      <h5 className="font-semibold text-slate-200 tracking-wide text-sm">Financial Tolerance Threshold</h5>
-                      <p className="text-xs text-slate-400 mt-1">Maximum permitted unauthorized ledger delta across all side-effect integrity cases</p>
+                      <h5 className="font-semibold text-[13px] tracking-wide" style={{ color: 'var(--text-primary)' }}>Financial Tolerance Threshold</h5>
+                      <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Maximum permitted unauthorized ledger delta across all side-effect integrity cases</p>
                     </div>
-                    <code className="bg-slate-900 px-3 py-1 rounded-lg border border-slate-700 text-emerald-400 font-mono text-sm">$0.00</code>
+                    <code className="px-3 py-1 rounded-lg font-mono text-[13px] ml-4 flex-shrink-0" style={{ background: 'var(--bg-primary)', border: '1px solid rgba(0,228,155,0.25)', color: 'var(--accent-emerald)' }}>$0.00</code>
                  </div>
 
-                 <div className="flex items-center justify-between p-5 border border-slate-700/50 rounded-xl bg-slate-800/40 backdrop-blur-sm shadow-inner transition-colors hover:border-slate-600">
+                 <div className="flex items-center justify-between p-4 rounded-lg transition-all duration-200" style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'var(--bg-tertiary)' }}
+                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(0,228,155,0.2)')}
+                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}>
                     <div>
-                      <h5 className="font-semibold text-slate-200 tracking-wide text-sm">Model Armor Enforcement</h5>
-                      <p className="text-xs text-slate-400 mt-1">All corpus cases must pass through the configured Model Armor template before evaluation</p>
+                      <h5 className="font-semibold text-[13px] tracking-wide" style={{ color: 'var(--text-primary)' }}>Model Armor Enforcement</h5>
+                      <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>All corpus cases must pass through the configured Model Armor template before evaluation</p>
                     </div>
-                    <span className="provenance-tag provenance-live">ENFORCED</span>
+                    <span className="provenance-tag provenance-live ml-4 flex-shrink-0">ENFORCED</span>
                  </div>
 
-                 <div className="flex items-center justify-between p-5 border border-slate-700/50 rounded-xl bg-slate-800/40 backdrop-blur-sm shadow-inner transition-colors hover:border-slate-600">
+                 <div className="flex items-center justify-between p-4 rounded-lg transition-all duration-200" style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'var(--bg-tertiary)' }}
+                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(0,228,155,0.2)')}
+                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}>
                     <div>
-                      <h5 className="font-semibold text-slate-200 tracking-wide text-sm">Gateway Least-Privilege</h5>
-                      <p className="text-xs text-slate-400 mt-1">Agent Gateway policy digest must be bound in the ABOM; calls to unregistered endpoints are blocked</p>
+                      <h5 className="font-semibold text-[13px] tracking-wide" style={{ color: 'var(--text-primary)' }}>Gateway Least-Privilege</h5>
+                      <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Agent Gateway policy digest must be bound in the ABOM; calls to unregistered endpoints are blocked</p>
                     </div>
-                    <span className="provenance-tag provenance-live">ENFORCED</span>
+                    <span className="provenance-tag provenance-live ml-4 flex-shrink-0">ENFORCED</span>
                  </div>
               </div>
             </div>

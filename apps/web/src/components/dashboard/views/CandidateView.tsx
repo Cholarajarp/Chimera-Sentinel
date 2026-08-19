@@ -40,7 +40,7 @@ export function CandidateView(props: any) {
   return (
     <>
           <div id="candidate-view">
-            <div className="glass-panel action-banner">
+            <div className="panel action-banner">
               <div className="action-info">
                 <h2>Agent Bill of Materials</h2>
                 <p>
@@ -59,7 +59,7 @@ export function CandidateView(props: any) {
             </div>
 
             {!isLiveConnected && (
-              <div className="glass-panel corpus-placeholder">
+              <div className="panel corpus-placeholder">
                 <h3>ABOM requires a live connection</h3>
                 <p>
                   An Agent Bill of Materials is a recorded artifact bound to a registered revision.
@@ -72,7 +72,7 @@ export function CandidateView(props: any) {
             )}
 
             {isLiveConnected && !selectedCandidate && (
-              <div className="glass-panel corpus-placeholder">
+              <div className="panel corpus-placeholder">
                 <h3>No candidate revisions registered</h3>
                 <p>Register a candidate revision to inspect its Agent Bill of Materials.</p>
               </div>
@@ -81,7 +81,7 @@ export function CandidateView(props: any) {
             {isLiveConnected && selectedCandidate && (
               <>
                 {candidates.length > 1 && (
-                  <div className="glass-panel abom-selector">
+                  <div className="panel abom-selector">
                     <label htmlFor="abom-revision-select">Revision</label>
                     <select
                       id="abom-revision-select"
@@ -99,7 +99,7 @@ export function CandidateView(props: any) {
                 )}
 
                 <div className="abom-grid">
-                  <div className="glass-panel abom-panel">
+                  <div className="panel abom-panel">
                     <h4>Google Cloud managed resources</h4>
                     <div className="abom-fields">
                       <div>
@@ -125,7 +125,7 @@ export function CandidateView(props: any) {
                     </div>
                   </div>
 
-                  <div className="glass-panel abom-panel">
+                  <div className="panel abom-panel">
                     <h4>Bound configuration digests</h4>
                     <p className="abom-panel-note">
                       Any change to these inputs produces a different revision, so an attestation
@@ -150,7 +150,7 @@ export function CandidateView(props: any) {
                 </div>
 
                 <div className="abom-grid">
-                  <div className="glass-panel abom-panel">
+                  <div className="panel abom-panel">
                     <h4>Requested capabilities</h4>
                     <div className="abom-capabilities">
                       {selectedCandidate.abom.requested_capabilities.map(capability => (
@@ -168,7 +168,7 @@ export function CandidateView(props: any) {
                     </div>
                   </div>
 
-                  <div className="glass-panel abom-panel">
+                  <div className="panel abom-panel">
                     <h4>Risk and data classification</h4>
                     <div className="abom-capabilities">
                       <span className={`risk-tag ${riskClass(selectedCandidate.abom.risk_tier)}`}>
@@ -178,7 +178,7 @@ export function CandidateView(props: any) {
                         <span key={classification} className="split-tag">{classification}</span>
                       ))}
                     </div>
-                    <div className="abom-fields" style={{ marginTop: '1rem' }}>
+                    <div className="abom-fields mt-4">
                       <div>
                         <span>Policy pack / corpus</span>
                         <code>{selectedCandidate.policy_pack_id} · {selectedCandidate.corpus_version}</code>
@@ -190,7 +190,7 @@ export function CandidateView(props: any) {
             )}
 
             {isLiveConnected && selectedCandidate && (
-              <div className="glass-panel abom-panel">
+              <div className="panel abom-panel">
                 <h4>Revision comparison</h4>
                 {priorRevision && revisionDiff ? (
                   <>
@@ -232,7 +232,7 @@ export function CandidateView(props: any) {
                       </div>
                     </div>
 
-                    <dl className="case-expectations" style={{ marginTop: '1.25rem' }}>
+                    <dl className="case-expectations mt-5">
                       <div>
                         <dt>Capabilities added</dt>
                         <dd><code>{revisionDiff.added.length > 0 ? revisionDiff.added.join(', ') : 'none'}</code></dd>

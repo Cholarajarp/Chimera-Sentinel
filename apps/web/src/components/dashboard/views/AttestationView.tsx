@@ -40,7 +40,7 @@ export function AttestationView(props: any) {
   return (
     <>
           <div id="attestation-view">
-            <div className="glass-panel action-banner">
+            <div className="panel action-banner">
               <div className="action-info">
                 <h2>Cloud KMS Attestation Verifier</h2>
                 <p>The control plane verifies the signed envelope and returns one verdict</p>
@@ -64,10 +64,10 @@ export function AttestationView(props: any) {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="grid gap-6 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))' }}>
               {/* The verifier returns one aggregate verdict, so exactly one
                   verdict is displayed. Individual checks are never self-marked. */}
-              <div className="glass-panel abom-panel">
+              <div className="panel abom-panel">
                 <h4>Verification verdict</h4>
 
                 {verifyResult ? (
@@ -96,7 +96,7 @@ export function AttestationView(props: any) {
                   </p>
                 )}
 
-                <h4 style={{ marginTop: '1.5rem' }}>Checks covered by this verdict</h4>
+                <h4 className="mt-6">Checks covered by this verdict</h4>
                 <p className="abom-panel-note">
                   The verifier evaluates all of the following and fails closed on any one of them.
                 </p>
@@ -111,8 +111,8 @@ export function AttestationView(props: any) {
               </div>
 
               {/* Envelope JSON Viewer — live data if certified, walkthrough otherwise */}
-              <div className="glass-panel" style={{ padding: '1.75rem' }}>
-                <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--text-accent)' }}>
+              <div className="panel p-7">
+                <h4 className="text-[18px] font-semibold mb-4" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-accent)' }}>
                   Canonical Attestation Envelope
                   {attestationData && (
                     <span

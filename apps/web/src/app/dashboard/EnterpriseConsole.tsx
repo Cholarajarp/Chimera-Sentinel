@@ -1015,90 +1015,125 @@ export default function EnterpriseConsole() {
 
   return (
     <DashboardProvider value={contextValue}>
-    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100 font-sans antialiased selection:bg-emerald-500/30">
-      
+    <div className="flex h-screen overflow-hidden font-sans antialiased selection:bg-[rgba(0,212,255,0.2)]" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+
       <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} handleExportReport={handleExportReport} />
-      <main className="flex-1 flex flex-col relative h-screen overflow-hidden">
-        
-        {/* Top Action Bar (Premium Glass) */}
-        <div className="flex-none h-20 border-b border-slate-800 bg-slate-950 px-8 flex items-center justify-between z-40">
-          <div className="flex items-center gap-6">
+
+      <main className="flex-1 flex flex-col relative h-screen overflow-hidden min-w-0">
+
+        {/* ── Top Action Bar ───────────────────────────────────────────────── */}
+        <div
+          className="flex-none h-[72px] px-6 flex items-center justify-between z-40 flex-shrink-0"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'var(--bg-secondary)' }}
+        >
+          {/* Left: status pill + workflow ID + tenant */}
+          <div className="flex items-center gap-4 min-w-0">
             <div className={cn(
-               "flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium tracking-wide shadow-sm",
-               isCertified ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" :
-               isRunningSim ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400" :
-               "bg-amber-500/10 border-amber-500/30 text-amber-400"
+              "flex items-center gap-2 px-3 py-1.5 rounded-full border text-[11px] font-bold tracking-wide flex-shrink-0",
+              isCertified
+                ? "bg-[rgba(0,228,155,0.1)] border-[rgba(0,228,155,0.3)] text-[#00e49b]"
+                : isRunningSim
+                  ? "bg-[rgba(0,212,255,0.08)] border-[rgba(0,212,255,0.25)] text-[#00d4ff]"
+                  : "bg-[rgba(251,191,36,0.08)] border-[rgba(251,191,36,0.25)] text-[#fbbf24]"
             )}>
-               <span className={cn("w-2 h-2 rounded-full", isCertified ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : isRunningSim ? "bg-indigo-400 animate-pulse" : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]")} />
-               {missionStatus}
+              <span className={cn(
+                "w-1.5 h-1.5 rounded-full flex-shrink-0",
+                isCertified   ? "bg-[#00e49b]" : "",
+                isRunningSim  ? "bg-[#00d4ff] animate-pulse" : "",
+                !isCertified && !isRunningSim ? "bg-[#fbbf24]" : ""
+              )} style={isCertified ? { boxShadow: '0 0 6px rgba(0,228,155,0.8)' } : {}} />
+              {missionStatus}
             </div>
 
-            {liveWorkflowId && <code className="px-2 py-1 rounded bg-slate-800 text-slate-300 font-mono text-xs border border-slate-700">{liveWorkflowId}</code>}
-            
-            <div className="flex items-center gap-3 border-l border-slate-800 pl-6">
-               <span className="text-[10px] font-mono text-slate-500 uppercase">Tenant: {TENANT_ID}</span>
+            {liveWorkflowId && (
+              <code
+                className="px-2 py-1 rounded text-[11px] font-mono truncate max-w-[240px] hidden md:block flex-shrink-0"
+                style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid rgba(255,255,255,0.07)' }}
+              >
+                {liveWorkflowId}
+              </code>
+            )}
+
+            <div className="hidden lg:flex items-center pl-4 flex-shrink-0" style={{ borderLeft: '1px solid rgba(255,255,255,0.07)' }}>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--text-muted)' }}>
+                tenant · {TENANT_ID.slice(0, 18)}…
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-             {nextProof ? (
-                <button
-                  onClick={() => setActiveTab(nextProof.tab)}
-                  className={cn("flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-all shadow-lg", isCertified ? "bg-emerald-500 hover:bg-emerald-400 text-emerald-950 shadow-emerald-500/20" : "bg-indigo-500 hover:bg-indigo-400 text-white shadow-indigo-500/20")}
-                >
-                  {nextProof.label} <nextProof.icon size={16} />
-                </button>
-             ) : (
-                <button
-                  onClick={handleStartCertification}
-                  disabled={isRunningSim}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold tracking-wide disabled:opacity-50 transition-all shadow-lg shadow-indigo-500/20"
-                >
-                  {isRunningSim ? <Activity className="animate-spin" size={16} /> : <Play size={16} />}
-                  {isRunningSim ? 'Running…' : experienceMode === 'replay' ? 'Run Guided Replay' : 'Run Live Cloud'}
-                </button>
-             )}
+          {/* Right: action button */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {nextProof ? (
+              <button
+                onClick={() => setActiveTab(nextProof.tab)}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-lg text-[12.5px] font-bold tracking-wide transition-all duration-200",
+                  isCertified
+                    ? "text-[#021a0e]"
+                    : "text-white"
+                )}
+                style={isCertified
+                  ? { background: 'var(--accent-emerald)', boxShadow: '0 0 0 1px rgba(0,228,155,0.3), 0 4px 14px rgba(0,228,155,0.2)' }
+                  : { background: '#4f46e5', boxShadow: '0 4px 14px rgba(79,70,229,0.3)' }
+                }
+              >
+                {nextProof.label}
+                <nextProof.icon size={14} />
+              </button>
+            ) : (
+              <button
+                onClick={handleStartCertification}
+                disabled={isRunningSim}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12.5px] font-bold tracking-wide disabled:opacity-40 transition-all duration-200"
+                style={{ background: 'var(--accent-emerald)', color: '#021a0e', boxShadow: '0 0 0 1px rgba(0,228,155,0.3), 0 4px 14px rgba(0,228,155,0.18)' }}
+              >
+                {isRunningSim ? <Activity className="animate-spin" size={14} /> : <Play size={14} />}
+                {isRunningSim ? 'Evaluating…' : experienceMode === 'replay' ? 'Run Guided Replay' : 'Run Live Certification'}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Global Error Bar */}
+        {/* ── Global Error Bar ─────────────────────────────────────────────── */}
         <AnimatePresence>
           {apiError && (
-             <motion.div
-               initial={{ opacity: 0, height: 0 }}
-               animate={{ opacity: 1, height: 'auto' }}
-               exit={{ opacity: 0, height: 0 }}
-               className="bg-rose-500/10 border-b border-rose-500/20 text-rose-400 px-8 py-3 flex items-center justify-between text-sm z-30"
-             >
-               <span><strong>Error:</strong> {apiError}</span>
-               <button onClick={() => setApiError(null)} className="hover:text-rose-300"><X size={16} /></button>
-             </motion.div>
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="inline-error-bar z-30 flex-shrink-0"
+            >
+              <span><strong>Error:</strong> {apiError}</span>
+              <button onClick={() => setApiError(null)} style={{ flexShrink: 0 }}><X size={14} /></button>
+            </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Scrollable Main Content */}
-        <div className="flex-1 overflow-y-auto p-8 lg:p-12 relative custom-scrollbar">
+        {/* ── Scrollable Main Content ──────────────────────────────────────── */}
+        <div className="flex-1 overflow-y-auto p-6 lg:p-8 relative custom-scrollbar min-h-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="max-w-7xl mx-auto space-y-8">
-              {activeTab === 'fleet' && <FleetView />}
-              {activeTab === 'candidate' && <CandidateView />}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="max-w-[1400px] mx-auto"
+            >
+              {activeTab === 'fleet'         && <FleetView />}
+              {activeTab === 'candidate'     && <CandidateView />}
               {activeTab === 'certification' && <CertificationView />}
-              {activeTab === 'corpus' && <CorpusView />}
-              {activeTab === 'approval' && <ApprovalView />}
-              {activeTab === 'evidence' && <EvidenceView />}
-              {activeTab === 'attestation' && <AttestationView />}
-              {activeTab === 'trace' && <TraceView />}
-              {activeTab === 'policy' && <PolicyView />}
+              {activeTab === 'corpus'        && <CorpusView />}
+              {activeTab === 'approval'      && <ApprovalView />}
+              {activeTab === 'evidence'      && <EvidenceView />}
+              {activeTab === 'attestation'   && <AttestationView />}
+              {activeTab === 'trace'         && <TraceView />}
+              {activeTab === 'policy'        && <PolicyView />}
               {activeTab === 'vulnerability' && <VulnerabilityView />}
             </motion.div>
           </AnimatePresence>
         </div>
+
       </main>
     </div>
     </DashboardProvider>

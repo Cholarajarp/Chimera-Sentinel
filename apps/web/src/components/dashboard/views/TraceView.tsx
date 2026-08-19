@@ -40,7 +40,7 @@ export function TraceView(props: any) {
   return (
     <>
           <div id="trace-view">
-            <div className="glass-panel action-banner">
+            <div className="panel action-banner">
               <div className="action-info">
                 <h2>Trace correlation</h2>
                 <p>W3C trace identifiers recorded against durable workflow events</p>
@@ -55,7 +55,7 @@ export function TraceView(props: any) {
             </div>
 
             {/* Trace IDs are read from recorded audit events, never synthesized. */}
-            <div className="glass-panel abom-panel">
+            <div className="panel abom-panel">
               <h4>Recorded trace identifiers</h4>
               {correlatedTraces.length === 0 ? (
                 <p className="abom-panel-note">
@@ -90,7 +90,7 @@ export function TraceView(props: any) {
                 </>
               )}
 
-              <h4 style={{ marginTop: '1.5rem' }}>Telemetry redaction policy</h4>
+              <h4 className="mt-6">Telemetry redaction policy</h4>
               <p className="abom-panel-note">
                 Spans are emitted through an allowlist so payloads stay out of telemetry. This states
                 the policy; it is not a claim that an audit has been run in this session.

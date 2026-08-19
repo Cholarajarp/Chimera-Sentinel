@@ -1,6 +1,19 @@
 import React from 'react';
 import Image from 'next/image';
-import { Download } from 'lucide-react';
+import {
+  Download,
+  Layers,
+  GitBranch,
+  FlaskConical,
+  CheckSquare,
+  FileText,
+  KeyRound,
+  Activity,
+  Settings2,
+  ScanSearch,
+  LayoutDashboard,
+  type LucideProps,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -16,17 +29,17 @@ export type TabType =
   | 'policy'
   | 'vulnerability';
 
-export const TABS: Array<{ value: TabType; label: string }> = [
-  { value: 'fleet', label: 'Fleet Posture' },
-  { value: 'candidate', label: 'Candidate ABOM' },
-  { value: 'certification', label: 'Certification Timeline' },
-  { value: 'corpus', label: '80-Case Matrix' },
-  { value: 'approval', label: 'Reviewer Approval' },
-  { value: 'evidence', label: 'Evidence Manifest' },
-  { value: 'attestation', label: 'KMS Attestation Verifier' },
-  { value: 'trace', label: 'Cloud Trace Correlation' },
-  { value: 'policy', label: 'Dynamic Policy Config' },
-  { value: 'vulnerability', label: 'Vulnerability Scanner' },
+export const TABS: Array<{ value: TabType; label: string; icon: React.ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>> }> = [
+  { value: 'fleet',         label: 'Fleet Posture',          icon: LayoutDashboard },
+  { value: 'candidate',     label: 'Candidate ABOM',         icon: Layers },
+  { value: 'certification', label: 'Certification Timeline', icon: GitBranch },
+  { value: 'corpus',        label: '80-Case Matrix',         icon: FlaskConical },
+  { value: 'approval',      label: 'Reviewer Approval',      icon: CheckSquare },
+  { value: 'evidence',      label: 'Evidence Manifest',      icon: FileText },
+  { value: 'attestation',   label: 'KMS Attestation',        icon: KeyRound },
+  { value: 'trace',         label: 'Cloud Trace',            icon: Activity },
+  { value: 'policy',        label: 'Policy Config',          icon: Settings2 },
+  { value: 'vulnerability', label: 'Vulnerability Scan',     icon: ScanSearch },
 ];
 
 interface SidebarNavProps {
@@ -37,49 +50,76 @@ interface SidebarNavProps {
 
 export function SidebarNav({ activeTab, setActiveTab, handleExportReport }: SidebarNavProps) {
   return (
-    <aside className="w-[280px] flex-shrink-0 flex flex-col border-r border-slate-800 bg-[#09090b] z-50">
-      <div className="h-20 flex items-center gap-4 px-6 border-b border-slate-800">
-        <div className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/0 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-          <Image src="/chimera-sentinel.png" alt="" width={24} height={24} priority className="drop-shadow-lg" />
+    <aside className="w-[260px] flex-shrink-0 flex flex-col border-r border-[rgba(255,255,255,0.07)] bg-[#06070a] z-50">
+      {/* Brand */}
+      <div className="h-[72px] flex items-center gap-3 px-5 border-b border-[rgba(255,255,255,0.07)]">
+        <div className="relative w-9 h-9 flex items-center justify-center rounded-lg bg-[#0d0f14] border border-[rgba(0,228,155,0.2)] shadow-[0_0_12px_rgba(0,228,155,0.12)]">
+          <Image src="/chimera-sentinel.png" alt="" width={22} height={22} priority className="drop-shadow-lg" />
         </div>
-        <div className="flex flex-col">
-          <span className="font-display font-semibold tracking-wide text-sm text-white drop-shadow-md">Chimera Sentinel</span>
-          <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">Admission Control</span>
+        <div className="flex flex-col min-w-0">
+          <span className="font-semibold tracking-tight text-[13px] text-white leading-tight">Chimera Sentinel</span>
+          <span className="text-[9px] font-mono font-bold text-[#00e49b] uppercase tracking-[0.14em] leading-tight mt-0.5">Admission Control</span>
         </div>
       </div>
 
-      <nav className="flex-1 py-6 px-4 space-y-1 overflow-y-auto custom-scrollbar">
-        {TABS.map(tab => (
-          <button
-            key={tab.value}
-            id={`tab-${tab.value}`}
-            onClick={() => setActiveTab(tab.value)}
-            className={cn(
-              "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 relative group",
-              activeTab === tab.value 
-                ? "text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" 
-                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-            )}
-          >
-            {activeTab === tab.value && (
-              <motion.div layoutId="activeTabIndicator" className="absolute left-0 w-1 h-6 bg-emerald-400 rounded-r-full shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
-            )}
-            {tab.label}
-          </button>
-        ))}
+      {/* Nav */}
+      <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto custom-scrollbar">
+        {/* Section label */}
+        <div className="px-3 pb-2 pt-1">
+          <span className="text-[9px] font-mono font-bold text-[#4e596b] uppercase tracking-[0.12em]">Navigation</span>
+        </div>
+
+        {TABS.map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.value;
+          return (
+            <button
+              key={tab.value}
+              id={`tab-${tab.value}`}
+              onClick={() => setActiveTab(tab.value)}
+              className={cn(
+                "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[12.5px] font-medium transition-all duration-200 relative group text-left",
+                isActive
+                  ? "text-[#00e49b] bg-[rgba(0,228,155,0.08)] border border-[rgba(0,228,155,0.18)]"
+                  : "text-[#8b9cb8] hover:text-[#f1f5f9] hover:bg-[rgba(255,255,255,0.04)] border border-transparent"
+              )}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="activeTabIndicator"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 bg-[#00e49b] rounded-r-full"
+                  style={{ boxShadow: '0 0 8px rgba(0,228,155,0.7)' }}
+                />
+              )}
+              <Icon
+                size={14}
+                className={cn(
+                  "flex-shrink-0 transition-colors duration-200",
+                  isActive ? "text-[#00e49b]" : "text-[#4e596b] group-hover:text-[#8b9cb8]"
+                )}
+              />
+              <span className="truncate">{tab.label}</span>
+            </button>
+          );
+        })}
       </nav>
 
-      <div className="p-4 border-t border-slate-800 flex flex-col gap-3">
-        <div className="flex items-center justify-between px-2">
-           <button onClick={handleExportReport} className="p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors" title="Export Report"><Download size={16} /></button>
-        </div>
+      {/* Footer */}
+      <div className="p-3 border-t border-[rgba(255,255,255,0.07)] flex flex-col gap-2">
         <button
-           onClick={async () => {
-              document.cookie = 'sentinel-session=; path=/; max-age=0; SameSite=Strict';
-              window.sessionStorage.removeItem('sentinel-experience');
-              window.location.assign('/signin');
-           }}
-           className="w-full py-2.5 rounded-lg border border-slate-800 bg-[#111113] text-slate-400 text-xs font-medium uppercase tracking-wider hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 transition-all duration-200"
+          onClick={handleExportReport}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium text-[#8b9cb8] hover:text-[#f1f5f9] hover:bg-[rgba(255,255,255,0.04)] border border-transparent hover:border-[rgba(255,255,255,0.07)] transition-all duration-200"
+        >
+          <Download size={13} className="flex-shrink-0" />
+          <span>Export Report</span>
+        </button>
+        <button
+          onClick={async () => {
+            document.cookie = 'sentinel-session=; path=/; max-age=0; SameSite=Strict';
+            window.sessionStorage.removeItem('sentinel-experience');
+            window.location.assign('/signin');
+          }}
+          className="w-full py-2 rounded-lg border border-[rgba(255,255,255,0.07)] bg-transparent text-[#4e596b] text-[11px] font-medium uppercase tracking-wider hover:bg-[rgba(251,75,110,0.08)] hover:text-[#fda4af] hover:border-[rgba(251,75,110,0.2)] transition-all duration-200"
         >
           Sign Out
         </button>

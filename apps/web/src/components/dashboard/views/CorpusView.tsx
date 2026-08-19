@@ -40,7 +40,7 @@ export function CorpusView(props: any) {
   return (
     <>
           <div id="corpus-view">
-            <div className="glass-panel action-banner">
+            <div className="panel action-banner">
               <div className="action-info">
                 <h2>{corpus ? corpus.name : 'Adversarial Evaluation Corpus'}</h2>
                 <p>
@@ -52,7 +52,7 @@ export function CorpusView(props: any) {
               <div className="btn-group">
                 {corpus && (
                   <span
-                    className={`provenance-tag ${corpus.integrity.all_digests_verified ? 'provenance-live' : 'provenance-demo'}`}
+                    className={`provenance-tag ${corpus.integrity.all_digests_verified ? 'provenance-live' : 'provenance-warn'}`}
                     title={`Manifest ${corpus.integrity.manifest_sha256}`}
                   >
                     {corpus.integrity.all_digests_verified
@@ -64,14 +64,14 @@ export function CorpusView(props: any) {
             </div>
 
             {corpusStatus === 'loading' && (
-              <div className="glass-panel corpus-placeholder" role="status">
+              <div className="panel corpus-placeholder" role="status">
                 <Activity size={18} className="spinner" aria-hidden="true" />
                 <p>Loading digest-verified case definitions from the control plane…</p>
               </div>
             )}
 
             {corpusStatus === 'error' && (
-              <div className="glass-panel corpus-placeholder is-error" role="alert">
+              <div className="panel corpus-placeholder is-error" role="alert">
                 <h3>Case definitions unavailable</h3>
                 <p>{corpusError}</p>
                 <p className="corpus-placeholder-note">
@@ -83,7 +83,7 @@ export function CorpusView(props: any) {
 
             {/* Filters Row */}
             {corpusStatus === 'ready' && (
-            <div className="glass-panel" style={{ marginBottom: '1.5rem' }}>
+            <div className="panel mb-6">
               <div className="filter-row">
                 <input
                   id="case-search-input"
@@ -94,7 +94,7 @@ export function CorpusView(props: any) {
                   onChange={e => setSearchQuery(e.target.value)}
                 />
 
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div className="flex gap-3">
                   <select
                     id="split-filter-select"
                     className="filter-select"
@@ -210,24 +210,12 @@ export function CorpusView(props: any) {
             {/* Case Detail Modal */}
             {selectedCase && (
               <div
-                style={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'rgba(0,0,0,0.7)',
-                  backdropFilter: 'blur(8px)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 100,
-                }}
+                className="fixed inset-0 flex items-center justify-center z-[100]"
+                style={{ background: 'rgba(0,0,0,0.75)' }}
                 onClick={() => setSelectedCase(null)}
                 onKeyDown={event => {
                   if (event.key === 'Escape') setSelectedCase(null);
                   if (event.key !== 'Tab') return;
-
                   const focusable = Array.from(caseDialogRef.current?.querySelectorAll(
                     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
                   ) || []) as HTMLElement[];
@@ -245,25 +233,26 @@ export function CorpusView(props: any) {
               >
                 <div
                   ref={caseDialogRef}
-                  className="glass-panel"
-                  style={{ width: '90%', maxWidth: '650px', padding: '2rem', outline: 'none', background: 'var(--bg-secondary)' }}
+                  className="panel w-[90%] max-w-[650px] p-8 outline-none"
+                  style={{ background: 'var(--bg-secondary)' }}
                   onClick={e => e.stopPropagation()}
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="case-modal-title"
                   tabIndex={-1}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                    <h3 id="case-modal-title" style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }}>
+                  <div className="flex justify-between items-center mb-5">
+                    <h3 id="case-modal-title" className="text-[20px] font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
                       Case definition: {selectedCase.case_id}
                     </h3>
                     <button
                       type="button"
-                      style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '1.5rem', cursor: 'pointer', lineHeight: 1 }}
+                      className="p-1.5 rounded-lg transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)]"
+                      style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
                       onClick={() => setSelectedCase(null)}
                       aria-label="Close case detail"
                     >
-                      <X size={18} aria-hidden="true" />
+                      <X size={16} aria-hidden="true" />
                     </button>
                   </div>
 

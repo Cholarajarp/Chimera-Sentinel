@@ -224,7 +224,7 @@ export function FleetView(props: any) {
 
             {/* KPI Cards */}
             <div className="kpi-grid">
-              <div className={`glass-panel kpi-card ${
+              <div className={`panel kpi-card ${
                 liveFleetPosture
                   ? liveFleetPosture.posture === 'HEALTHY' ? 'posture-healthy' : 'posture-attention'
                   : ''
@@ -249,7 +249,7 @@ export function FleetView(props: any) {
                 </div>
               </div>
 
-              <div className="glass-panel kpi-card">
+              <div className="panel kpi-card">
                 <div className="kpi-card-header">
                   <span>Certification Workflows</span>
                 </div>
@@ -263,7 +263,7 @@ export function FleetView(props: any) {
                 </div>
               </div>
 
-              <div className="glass-panel kpi-card">
+              <div className="panel kpi-card">
                 <div className="kpi-card-header">
                   <span>Certified</span>
                 </div>
@@ -280,7 +280,7 @@ export function FleetView(props: any) {
                 </div>
               </div>
 
-              <div className="glass-panel kpi-card">
+              <div className="panel kpi-card">
                 <div className="kpi-card-header">
                   <span>Running / Review</span>
                 </div>
@@ -299,7 +299,7 @@ export function FleetView(props: any) {
                 </div>
               </div>
 
-              <div className={`glass-panel kpi-card ${(liveFleetPosture?.blocked ?? 0) > 0 ? 'posture-blocked' : ''}`}>
+              <div className={`panel kpi-card ${(liveFleetPosture?.blocked ?? 0) > 0 ? 'posture-blocked' : ''}`}>
                 <div className="kpi-card-header">
                   <span>Blocked Workflows</span>
                 </div>
@@ -318,11 +318,11 @@ export function FleetView(props: any) {
             </div>
 
             {liveFleetPosture && (
-              <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div className="panel p-6 mb-6">
+                <div className="flex justify-between items-center mb-5">
                   <div>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem' }}>Recent Certification Workflows</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>Durable workflow history returned by the control plane</p>
+                    <h3 className="text-[15px] font-semibold" style={{ fontFamily: 'var(--font-display)' }}>Recent Certification Workflows</h3>
+                    <p className="text-[12.5px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>Durable workflow history returned by the control plane</p>
                   </div>
                   <span className="provenance-tag provenance-live">LIVE</span>
                 </div>
@@ -346,13 +346,13 @@ export function FleetView(props: any) {
             )}
 
             {/* Fleet Inventory Table */}
-            <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <div className="panel p-6 mb-6">
+              <div className="flex justify-between items-center mb-5">
                 <div>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem' }}>
+                  <h3 className="text-[15px] font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
                     Registered Agent Revisions
                   </h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
+                  <p className="text-[12.5px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                     Immutable candidate revisions recorded by the control plane
                   </p>
                 </div>
@@ -432,8 +432,8 @@ export function FleetView(props: any) {
                     owned by the control plane.
                   </p>
                   <p className="corpus-placeholder-note">
-                    Switch to Live Cloud to load the real inventory. Sentinel does not display
-                    sample agents in place of registered ones.
+                    Switch to Live Cloud to load the real inventory. Sentinel does not substitute
+                    fabricated records in place of registered revisions.
                   </p>
                 </div>
               )}

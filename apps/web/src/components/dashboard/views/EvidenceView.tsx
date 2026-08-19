@@ -40,7 +40,7 @@ export function EvidenceView(props: any) {
   return (
     <>
           <div id="evidence-view">
-            <div className="glass-panel action-banner">
+            <div className="panel action-banner">
               <div className="action-info">
                 <h2>Content-Addressed Evidence Bundle Manifest</h2>
                 <p>RFC 8785 JSON Canonicalization Scheme (JCS) verified objects</p>
@@ -54,7 +54,7 @@ export function EvidenceView(props: any) {
               </div>
             </div>
 
-            <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+            <div className="panel p-6 mb-6">
               <div className="table-wrapper">
                 <table className="sentinel-table">
                   <thead>
@@ -72,7 +72,7 @@ export function EvidenceView(props: any) {
                       <tr key={object.path}>
                         <td><code>{object.path}</code></td>
                         <td>{object.schema_version}</td>
-                        <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem' }}>{object.sha256_digest}</td>
+                        <td className="font-mono text-[12.5px]">{object.sha256_digest}</td>
                         <td>{(object.size_bytes / 1024).toFixed(1)} KB</td>
                         <td>{object.producer}</td>
                         <td><span className="provenance-tag provenance-live">{object.provenance}</span></td>

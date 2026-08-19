@@ -40,7 +40,7 @@ export function ApprovalView(props: any) {
   return (
     <>
           <div id="approval-view">
-            <div className="glass-panel action-banner">
+            <div className="panel action-banner">
               <div className="action-info">
                 <h2>Human Governance & Constrained Approval Console</h2>
                 <p>Enforce least-privilege capability reduction before release certification</p>
@@ -104,7 +104,7 @@ export function ApprovalView(props: any) {
                 <p>
                   {experienceMode === 'live' && apiReachable
                     ? 'This decision will be submitted to the live control plane and the constrained revision will be retested before attestation.'
-                    : 'This replay demonstrates the review protocol. Switch to Live Cloud to submit a production decision backed by control-plane evidence.'}
+                    : 'This guided walkthrough does not write to the control plane. Switch to Live Cloud to submit a production decision backed by control-plane evidence.'}
                 </p>
                 <button className="btn btn-secondary" onClick={() => setActiveTab('evidence')}>
                   <Database size={15} aria-hidden="true" />
@@ -113,54 +113,55 @@ export function ApprovalView(props: any) {
               </div>
             </section>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-              <div className="glass-panel" style={{ padding: '1.75rem' }}>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--text-accent)' }}>
+            <div className="grid gap-6 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))' }}>
+              {/* Capability diff */}
+              <div className="panel p-7">
+                <h3 className="text-[17px] font-semibold mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-accent)' }}>
                   Proposed Least-Privilege Capability Diff
                 </h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-                  Candidate requested excessive autonomy (`release_payment`). Sentinel policy mandates narrowing capability to drafting only.
+                <p className="text-[13px] mb-5" style={{ color: 'var(--text-secondary)' }}>
+                  Candidate requested excessive autonomy (<code>release_payment</code>). Sentinel policy mandates narrowing capability to drafting only.
                 </p>
 
                 <div className="diff-container" style={{ margin: 0 }}>
                   <div className="diff-box diff-box-before">
-                    <div style={{ fontWeight: 600, color: 'var(--accent-rose)', marginBottom: '0.5rem' }}>
-                      REVOKED CAPABILITY
+                    <div className="font-bold text-[11px] tracking-widest uppercase mb-2" style={{ color: 'var(--accent-rose)' }}>
+                      Revoked Capability
                     </div>
                     <span className="capability-pill-danger">release_payment</span>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.5rem' }}>
+                    <p className="text-[12px] mt-2" style={{ color: 'var(--text-muted)' }}>
                       Prohibits direct release of financial funds
                     </p>
                   </div>
 
                   <div className="diff-box diff-box-after">
-                    <div style={{ fontWeight: 600, color: 'var(--accent-emerald)', marginBottom: '0.5rem' }}>
-                      APPROVED CAPABILITY
+                    <div className="font-bold text-[11px] tracking-widest uppercase mb-2" style={{ color: 'var(--accent-emerald)' }}>
+                      Approved Capabilities
                     </div>
                     <span className="capability-pill-success">draft_invoice_payment</span>
                     <span className="capability-pill-success">get_payment_status</span>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.5rem' }}>
+                    <p className="text-[12px] mt-2" style={{ color: 'var(--text-muted)' }}>
                       Retains useful invoice drafting and status querying
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="glass-panel" style={{ padding: '1.75rem' }}>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--text-accent)' }}>
+              {/* Reviewer credentials */}
+              <div className="panel p-7">
+                <h3 className="text-[17px] font-semibold mb-4" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-accent)' }}>
                   Reviewer Authorization Credentials
                 </h3>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="flex flex-col gap-4">
                   <div>
-                    <label htmlFor="reviewer-principal" style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+                    <label htmlFor="reviewer-principal" className="block text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
                       Reviewer principal (authenticated)
                     </label>
                     <input
                       id="reviewer-principal"
                       type="text"
-                      className="search-input"
-                      style={{ width: '100%' }}
+                      className="search-input w-full"
                       value={reviewerPrincipal ?? 'Not signed in'}
                       readOnly
                       disabled
@@ -173,12 +174,11 @@ export function ApprovalView(props: any) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
                       Reviewer RBAC Role
                     </label>
                     <select
-                      className="filter-select"
-                      style={{ width: '100%' }}
+                      className="filter-select w-full"
                       value={reviewerRole}
                       onChange={e => setReviewerRole(e.target.value)}
                     >
@@ -187,30 +187,32 @@ export function ApprovalView(props: any) {
                       <option value="compliance_officer">Compliance officer</option>
                     </select>
                     <p className="reviewer-principal-note">
-                      Recorded with the decision. Separation of duties is enforced on identity, not
-                      on this label.
+                      Recorded with the decision. Separation of duties is enforced on identity, not on this label.
                     </p>
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
                       Validity Window: {expiryDays} Days
                     </label>
+                    {/* Thin progress bar showing validity */}
+                    <div className="progress-bar-track mb-2">
+                      <div className="progress-bar-fill" style={{ width: `${((expiryDays - 30) / 150) * 100}%` }} />
+                    </div>
                     <input
                       type="range"
                       min="30"
                       max="180"
                       value={expiryDays}
                       onChange={e => setExpiryDays(Number(e.target.value))}
-                      style={{ width: '100%' }}
+                      className="w-full accent-[#00e49b]"
                     />
                   </div>
 
-                  <div style={{ marginTop: '0.5rem' }}>
+                  <div className="mt-1">
                     <button
-                      className="btn btn-emerald"
+                      className="btn btn-emerald w-full justify-center"
                       id="btn-submit-approval"
-                      style={{ width: '100%', justifyContent: 'center' }}
                       onClick={handleGrantApproval}
                       disabled={!isApprovalReady || approvalGranted}
                       title={!isApprovalReady ? 'Start a certification run first — workflow must be in ApprovalRequired state' : approvalGranted ? 'Approval already submitted' : undefined}

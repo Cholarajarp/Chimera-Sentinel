@@ -40,10 +40,10 @@ export function CertificationView(props: any) {
   return (
     <>
           <div id="timeline-view">
-            <div className="glass-panel action-banner">
+            <div className="panel action-banner">
               <div className="action-info">
                 <h2>Durable Release Admission Workflow</h2>
-                <p>Current Workflow State: <strong style={{ color: 'var(--accent-emerald)' }}>{workflowState}</strong></p>
+                <p>Current Workflow State: <strong className="text-[#00e49b]">{workflowState}</strong></p>
               </div>
               <div className="btn-group">
                 <button
@@ -78,7 +78,7 @@ export function CertificationView(props: any) {
             )}
 
             {/* Stepper */}
-            <div className="glass-panel stepper-container">
+            <div className="panel stepper-container">
               {steps.map((step, idx) => {
                 const isCompleted = idx < currentStepIdx;
                 const isActive = idx === currentStepIdx;
@@ -97,7 +97,7 @@ export function CertificationView(props: any) {
             </div>
 
             {/* Append-only audit trail, read back from durable storage. */}
-            <div className="glass-panel abom-panel">
+            <div className="panel abom-panel">
               <div className="audit-head">
                 <h4>Append-only workflow audit trail</h4>
                 {isLiveConnected && liveWorkflowId && (

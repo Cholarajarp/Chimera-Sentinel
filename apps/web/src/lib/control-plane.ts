@@ -495,7 +495,7 @@ export async function createWorkflow(tenantId: string, body: {
         registry_resource: `us-central1-docker.pkg.dev/chimera-sentinel/sentinel/agent:${revisionId}`,
         runtime_resource: `projects/chimera-sentinel/locations/us-central1/services/agent-${revisionId}`,
         agent_identity: `agent-${revisionId}@chimera-sentinel.iam.gserviceaccount.com`,
-        model_ref: 'gemini-2.5-flash-preview-05-20',
+        model_ref: 'gemini-3.5-flash-preview',
         prompt_config_digest: sha256('system-prompt-v2.1'),
         tool_manifest_digest: sha256('tool-manifest-v2.1'),
         memory_config_digest: sha256('memory-config-v2.1'),
