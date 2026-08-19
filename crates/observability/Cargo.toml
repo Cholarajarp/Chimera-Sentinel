@@ -1,0 +1,26 @@
+[package]
+name = "sentinel-observability"
+description = "Tracing, metrics, redaction"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+sentinel-domain = { workspace = true }
+tracing.workspace = true
+tracing-subscriber.workspace = true
+opentelemetry.workspace = true
+opentelemetry_sdk.workspace = true
+# Google Cloud Trace exporter — enable with feature flag so LOCAL mode compiles without GCP
+opentelemetry-otlp = { version = "0.27", features = ["grpc-tonic", "tls", "tls-roots"], optional = true }
+tracing-opentelemetry = { version = "0.28", optional = true }
+serde.workspace = true
+serde_json.workspace = true
+
+[features]
+cloud-trace = ["opentelemetry-otlp", "tracing-opentelemetry"]

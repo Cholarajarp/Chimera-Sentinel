@@ -1,0 +1,45 @@
+name: Deploy to Google Cloud
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Run Deployment Script
+        env:
+          PROJECT_ID: chimera-sentinel
+          REGION: us-east1
+        run: |
+          # Copy your local tfvars to the action runner
+          cp infra/terraform/terraform.tfvars.example infra/terraform/terraform.tfvars
+          
+          # Force minimum instances to 0 to prevent billing charges
+          sed -i 's/hot_path_min_instances = 1/hot_path_min_instances = 0/' infra/terraform/terraform.tfvars
+          
+          # Add any other required tfvars replacements if needed
+          sed -i "s/^project_id.*/project_id = \"${PROJECT_ID}\"/" infra/terraform/terraform.tfvars
+          
+          # Run the deploy script
+          bash infra/scripts/deploy.sh

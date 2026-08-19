@@ -1,0 +1,53 @@
+# Multi-stage Dockerfile for sentinelctl
+FROM rust:1.92-slim-bookworm AS builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    libssl-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy workspace files
+COPY Cargo.toml Cargo.lock ./
+COPY crates ./crates
+# Cargo resolves the whole workspace first, so every member must be present.
+COPY apps/control-plane ./apps/control-plane
+COPY apps/workflow-worker ./apps/workflow-worker
+COPY apps/sentinelctl ./apps/sentinelctl
+COPY apps/enterprise-erp-adapter ./apps/enterprise-erp-adapter
+
+# Build the binary. -p is required: app packages are not default-members.
+RUN cargo build --release -p sentinelctl --bin sentinelctl
+
+# Runtime stage
+FROM debian:bookworm-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN useradd -r -s /bin/false -u 10001 sentinel
+
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /app/target/release/sentinelctl /usr/local/bin/sentinelctl
+
+# Copy any config files
+COPY docker/config /app/config
+
+# Set ownership
+RUN chown -R sentinel:sentinel /app
+
+USER sentinel
+
+ENV RUST_LOG=info
+ENV SENTINEL_CONFIG=/app/config/sentinelctl.toml
+
+ENTRYPOINT ["sentinelctl"]

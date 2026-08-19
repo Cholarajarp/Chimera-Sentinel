@@ -1,0 +1,28 @@
+[package]
+name = "sentinel-attestation"
+description = "Attestation payload, KMS adapter, offline verifier"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+sentinel-domain = { workspace = true }
+sentinel-evidence = { workspace = true }
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+hex.workspace = true
+base64.workspace = true
+time.workspace = true
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+tokio = { version = "1", features = ["rt"] }
+uuid = { version = "1", features = ["v4"] }
+
+[dev-dependencies]
+sentinel-test-support = { workspace = true }

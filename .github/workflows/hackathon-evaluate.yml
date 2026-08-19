@@ -1,0 +1,53 @@
+name: Hackathon Evaluation
+
+on:
+  workflow_dispatch: # Allows you to manually trigger it from the Actions tab
+
+jobs:
+  evaluate:
+    name: Run Sentinel Evaluation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup environment and secrets
+        run: |
+          # Create .env file for docker-compose to use
+          echo "GOOGLE_CLOUD_PROJECT=chimera-sentinel" > .env
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/app/config/gcp_key.json" >> .env
+          
+          # Write the GCP Service Account Key to a file that docker-compose can mount
+          mkdir -p docker/config
+          echo '${{ secrets.GCP_SA_KEY }}' > docker/config/gcp_key.json
+          
+          # Add any other required environment variables
+          echo "SENTINEL_API_URL=http://localhost:8080" >> .env
+
+      - name: Start Sentinel Stack (Docker Compose)
+        run: docker compose up --build -d
+
+      - name: Wait for services to be healthy
+        run: |
+          echo "Waiting for Control Plane API..."
+          for i in {1..30}; do
+            if curl -s http://localhost:8080/healthz | grep '"status":"ok"'; then
+              echo "API is up!"
+              break
+            fi
+            echo "Waiting..."
+            sleep 5
+          done
+
+      - name: Run Schema Validation
+        run: make corpus-validate
+
+      - name: Execute 80-Case Evaluation (Smoke Test)
+        env:
+          SENTINEL_API_URL: http://localhost:8080
+          GOOGLE_CLOUD_PROJECT: chimera-sentinel
+        run: make smoke-live
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose down

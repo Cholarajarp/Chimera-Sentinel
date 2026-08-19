@@ -1,0 +1,52 @@
+# Sentinel Control Plane — Production Configuration
+# Env-var overrides win: SENTINEL_DATABASE__TYPE, SENTINEL_GOOGLE_CLOUD__USE_LIVE_SERVICES, etc.
+# Cloud Run sets these at deploy time via cloudbuild.yaml --set-env-vars.
+
+[server]
+addr = "0.0.0.0:8080"
+
+[database]
+# Overridden at runtime by SENTINEL_DATABASE__TYPE=firestore (set by Cloud Run deploy).
+# "memory" here is a local-dev / CI fallback only; Cloud Run always uses firestore.
+type = "memory"
+# project_id and database_id are injected via env vars — not hardcoded here.
+
+[observability]
+log_level = "info"
+log_format = "json"
+otel_endpoint = "http://localhost:4317"
+otel_service_name = "sentinel-control-plane"
+# 10 % sampling in production. Override with SENTINEL_OBSERVABILITY__TRACE_SAMPLE_RATE.
+trace_sample_rate = 0.1
+
+[security]
+rate_limit_rps = 1000
+rate_limit_burst = 2000
+# Authentication is enforced by Firebase Auth on the web layer and by IAM on
+# service-to-service calls (Cloud Run identity tokens). The Rust layer does not
+# implement a second OIDC layer; set to false and rely on IAM + Firebase.
+require_auth = false
+
+[google_cloud]
+# Overridden at runtime by SENTINEL_GOOGLE_CLOUD__USE_LIVE_SERVICES=true (Cloud Run).
+# Local Docker Compose runs without GCP credentials; live services are off by default.
+use_live_services = false
+# Placeholder resource names — real values injected by Cloud Run env vars.
+model_armor_template = ""
+gateway_policy = ""
+kms_key_resource = ""
+kms_key_version = "1"
+firestore_project = ""
+storage_bucket = ""
+
+[worker]
+poll_interval_secs = 5
+max_concurrent_workflows = 10
+
+[health_checks]
+check_database = true
+# check_google_services is set to true by the production Terraform config via env override.
+check_google_services = false
+# enterprise-erp-adapter is a test fixture, not a production dependency.
+# Production readiness must not depend on it being up.
+check_mock_erp = false

@@ -1,0 +1,52 @@
+# Sentinel Workflow Worker — Production Configuration
+# Env-var overrides win: SENTINEL_DATABASE__TYPE, SENTINEL_GOOGLE_CLOUD__USE_LIVE_SERVICES, etc.
+# Cloud Run sets these at deploy time via cloudbuild.yaml --set-env-vars.
+
+[worker]
+id = "worker-1"
+tenant_id = "00000000-0000-0000-0000-000000000001"
+poll_interval_secs = 5
+max_concurrent_workflows = 10
+shutdown_timeout_secs = 30
+
+[database]
+# Overridden at runtime by SENTINEL_DATABASE__TYPE=firestore (set by Cloud Run deploy).
+# "memory" here is a local-dev / CI fallback only; Cloud Run always uses firestore.
+type = "memory"
+# project_id and database_id are injected via env vars — not hardcoded here.
+
+[observability]
+log_level = "info"
+log_format = "json"
+otel_endpoint = "http://localhost:4317"
+otel_service_name = "sentinel-workflow-worker"
+# 10 % sampling in production. Override with SENTINEL_OBSERVABILITY__TRACE_SAMPLE_RATE.
+trace_sample_rate = 0.1
+
+[google_cloud]
+# Overridden at runtime by SENTINEL_GOOGLE_CLOUD__USE_LIVE_SERVICES=true (Cloud Run).
+# Local Docker Compose runs without GCP credentials; live services are off by default.
+use_live_services = false
+# Placeholder resource names — real values injected by Cloud Run env vars.
+model_armor_template = ""
+gateway_policy = ""
+kms_key_resource = ""
+kms_key_version = "1"
+firestore_project = ""
+storage_bucket = ""
+
+[certification]
+corpus_version = "v1.0.0"
+required_cases = [
+    "__ALL_CORPUS_CASES__",
+]
+retest_draft_case = "case-safe-invoice-001"
+retest_release_case = "case-excessive-agency-001"
+
+[health_checks]
+check_database = true
+# check_google_services is set to true by the production Terraform config via env override.
+check_google_services = false
+# enterprise-erp-adapter is a test fixture, not a production dependency.
+# Production readiness must not depend on it being up.
+check_mock_erp = false

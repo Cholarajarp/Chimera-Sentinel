@@ -1,0 +1,119 @@
+# Chimera Sentinel workspace
+#
+# This is a clean-room project. See NOTICE.md and docs/VANGUARD_TO_SENTINEL.md.
+# Pin exact versions in Cargo.lock (committed) via the entries below.
+
+[workspace]
+resolver = "2"
+members = [
+    "crates/domain",
+    "crates/contracts",
+    "crates/policy",
+    "crates/evidence",
+    "crates/attestation",
+    "crates/persistence",
+    "crates/observability",
+    "crates/google-adapters",
+    "crates/test-support",
+    "crates/config",
+    "crates/metrics",
+    "apps/control-plane",
+    "apps/workflow-worker",
+    "apps/sentinelctl",
+    "apps/enterprise-erp-adapter",
+]
+
+# Default exclude for non-Rust packages managed by pnpm / uv.
+default-members = [
+    "crates/domain",
+    "crates/contracts",
+    "crates/policy",
+    "crates/evidence",
+    "crates/attestation",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.92.0"
+license = "Apache-2.0"
+repository = "https://github.com/Cholarajarp/Chimera-Sentinel"
+publish = false
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "allow"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Allow pragmatic patterns common in enterprise code.
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+struct_excessive_bools = "allow"
+doc_markdown = "allow"
+uninlined_format_args = "allow"
+wildcard_imports = "allow"
+result_large_err = "allow"
+format_push_string = "allow"
+too_many_arguments = "allow"
+too_many_lines = "allow"
+match_same_arms = "allow"
+unused_async = "allow"
+unnecessary_map_or = "allow"
+single_match_else = "allow"
+semicolon_if_nothing_returned = "allow"
+redundant_closure = "allow"
+implicit_clone = "allow"
+ignored_unit_patterns = "allow"
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+unnecessary_cast = "allow"
+
+# Shared dependency versions. Crates reference these as `workspace = true`.
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.10", features = ["v4", "serde"] }
+thiserror = "2.0"
+time = { version = "0.3", features = ["serde", "formatting", "parsing"] }
+sha2 = "0.10"
+hex = "0.4"
+base64 = "0.22"
+bytes = "1.0"
+async-trait = "0.1"
+tokio = { version = "1.40", features = ["macros", "rt-multi-thread", "signal", "sync", "time", "fs"] }
+axum = { version = "0.7", features = ["macros"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["trace", "cors", "limit", "timeout"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+opentelemetry = "0.27"
+opentelemetry_sdk = { version = "0.27", features = ["rt-tokio"] }
+anyhow = "1.0"
+clap = { version = "4.5", features = ["derive", "env"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+figment = { version = "0.10", features = ["toml", "env"] }
+toml = "0.8"
+prometheus = "0.13"
+once_cell = "1.19"
+
+# Internal workspace crates (paths resolved by Cargo).
+sentinel-domain = { path = "crates/domain" }
+sentinel-contracts = { path = "crates/contracts" }
+sentinel-policy = { path = "crates/policy" }
+sentinel-evidence = { path = "crates/evidence" }
+sentinel-attestation = { path = "crates/attestation" }
+sentinel-persistence = { path = "crates/persistence" }
+sentinel-observability = { path = "crates/observability" }
+sentinel-google-adapters = { path = "crates/google-adapters" }
+sentinel-test-support = { path = "crates/test-support" }
+sentinel-config = { path = "crates/config" }
+sentinel-metrics = { path = "crates/metrics" }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

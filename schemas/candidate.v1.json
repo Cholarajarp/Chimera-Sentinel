@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentinel.enterprise/schemas/candidate.v1.json",
+  "title": "CandidateRevision",
+  "type": "object",
+  "required": ["tenant_id", "agent_id", "revision_id", "abom", "policy_pack_id", "corpus_version"],
+  "properties": {
+    "tenant_id": { "type": "string", "format": "uuid" },
+    "agent_id": { "type": "string" },
+    "revision_id": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "abom": {
+      "type": "object",
+      "required": [
+        "source_digest",
+        "registry_resource",
+        "runtime_resource",
+        "agent_identity",
+        "model_ref",
+        "prompt_config_digest",
+        "tool_manifest_digest",
+        "memory_config_digest",
+        "gateway_policy_digest",
+        "model_armor_config_digest",
+        "requested_capabilities",
+        "data_classification",
+        "environment",
+        "owner",
+        "risk_tier",
+        "provenance",
+        "recorded_at"
+      ],
+      "properties": {
+        "source_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "registry_resource": { "type": "string" },
+        "runtime_resource": { "type": "string" },
+        "agent_identity": { "type": "string" },
+        "model_ref": { "type": "string" },
+        "prompt_config_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "tool_manifest_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "memory_config_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "gateway_policy_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "model_armor_config_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "requested_capabilities": { "type": "array", "items": { "type": "string" } },
+        "data_classification": { "type": "array", "items": { "type": "string" } },
+        "environment": { "type": "string" },
+        "owner": { "type": "string" },
+        "risk_tier": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+        "provenance": { "type": "string", "enum": ["LIVE", "REPLAY", "DEMO", "INFERRED", "LOCAL"] },
+        "recorded_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "policy_pack_id": { "type": "string" },
+    "corpus_version": { "type": "string" }
+  }
+}

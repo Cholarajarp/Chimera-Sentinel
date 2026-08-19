@@ -1,0 +1,11 @@
+# Digest-verified artifacts must be byte-identical on every platform.
+# The corpus is content-addressed: its SHA-256 digests are recorded in
+# corpus/v1/manifest.json and re-verified at runtime, so CRLF checkouts would
+# change the bytes and break verification on Linux.
+corpus/** text eol=lf
+schemas/*.json text eol=lf
+policy-packs/** text eol=lf
+
+# Keep shell scripts and container files LF so Linux images build correctly.
+*.sh text eol=lf
+Dockerfile* text eol=lf

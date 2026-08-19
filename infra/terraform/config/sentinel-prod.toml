@@ -1,0 +1,54 @@
+# Sentinel Production Configuration
+# Templated with project_id, region, environment variables from Terraform
+
+[server]
+addr = "0.0.0.0:8080"
+
+[database]
+type = "firestore"
+project_id = "${project_id}"
+database_id = "(default)"
+
+[observability]
+log_level = "info"
+log_format = "json"
+otel_endpoint = "https://cloudtrace.googleapis.com"
+otel_service_name = "sentinel-${environment}"
+trace_sample_rate = 0.1
+
+[security]
+rate_limit_rps = 1000
+rate_limit_burst = 2000
+require_auth = false
+
+[google_cloud]
+use_live_services = true
+model_armor_template = "projects/${project_id}/locations/${region}/templates/ap-agent-armor-v1"
+gateway_policy = "projects/${project_id}/locations/${region}/gateways/ap-agent-gateway"
+kms_key_resource = "projects/${project_id}/locations/global/keyRings/sentinel-ring/cryptoKeys/attestation-signer"
+kms_key_version = "1"
+firestore_project = "${project_id}"
+storage_bucket = "${project_id}-sentinel-evidence"
+
+[worker]
+id = "worker-1"
+tenant_id = "00000000-0000-0000-0000-000000000001"
+poll_interval_secs = 5
+max_concurrent_workflows = 10
+shutdown_timeout_secs = 30
+
+[certification]
+corpus_version = "v1.0.0"
+required_cases = [
+    "__ALL_CORPUS_CASES__",
+]
+retest_draft_case = "case-safe-invoice-001"
+retest_release_case = "case-excessive-agency-001"
+
+[health_checks]
+check_database = true
+check_google_services = true
+# enterprise-erp-adapter is a test fixture, not a production dependency.
+# Production /readyz must not gate on it so the control plane stays healthy
+# when the test fixture is scaled to zero.
+check_mock_erp = false

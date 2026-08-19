@@ -1,0 +1,47 @@
+# terraform.tfvars.example
+#
+# Copy this file to terraform.tfvars and fill in your values.
+# NEVER commit terraform.tfvars — it contains project-specific config.
+#
+#   cp infra/terraform/terraform.tfvars.example infra/terraform/terraform.tfvars
+
+# ── Required ─────────────────────────────────────────────────────────────────
+project_id = "chimera-sentinel"
+
+# ── Optional (defaults are usually fine) ─────────────────────────────────────
+region      = "us-east1"
+environment = "prod"
+
+# Default is 0 — services cold-start on first request (cost-free at idle).
+# Cloud Run free tier covers millions of requests; you only pay for AI calls.
+# You do NOT need min_instances=1 for production. Set it only when presenting
+# a timed live demo where a 3-second cold-start is unacceptable.
+hot_path_min_instances = 0
+
+# Fill after first deploy — output from: terraform -chdir=infra/terraform output web_url
+# The /api proxy handles all browser→API traffic without CORS; this setting
+# permits direct API diagnostics from the browser console only.
+web_url_override = ""
+
+# ── Managed agent resources ───────────────────────────────────────────────────
+# Fill these in AFTER running: bash infra/scripts/setup-managed-agents.sh
+# The script outputs the correct resource names.
+
+# Three Gemini models — each serves a different role in the certification pipeline.
+# All three are currently GA or Preview on Google Cloud (see: cloud.google.com/vertex-ai/generative-ai/docs/learn/models).
+gemini_model_ref       = "gemini-3.5-flash-lite"   # GA  — batch case evaluation (80 cases, high volume)
+gemini_model_ref_agent = "gemini-3.5-flash"          # GA  — ADK agent orchestration / certifier brain
+gemini_model_ref_deep  = "gemini-3.1-pro-preview"    # Preview — deep analysis / ambiguous case escalation
+
+model_armor_template   = ""  # e.g. projects/chimera-sentinel/locations/us-east1/templates/ap-agent-armor-v1
+agent_gateway_resource = ""  # e.g. projects/chimera-sentinel/locations/us-east1/gateways/ap-agent-gateway
+memory_bank_resource   = ""  # e.g. projects/chimera-sentinel/locations/us-east1/ragCorpora/123456789
+
+# ── Firebase web app config (public — safe to commit) ─────────────────────────
+firebase_api_key              = "AIzaSyApjm0VdVcZyB8PZRBw99lv9MPx_m_EjTE"
+firebase_auth_domain          = "chimera-sentinel.firebaseapp.com"
+firebase_project_id           = "chimera-sentinel"
+firebase_storage_bucket       = "chimera-sentinel.firebasestorage.app"
+firebase_messaging_sender_id  = "817919872645"
+firebase_app_id               = "1:817919872645:web:b6826cca35d257c7e3e3ec"
+firebase_measurement_id       = "G-HP9JJWRTBS"

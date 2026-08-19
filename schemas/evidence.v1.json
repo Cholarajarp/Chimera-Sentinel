@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentinel.enterprise/schemas/evidence.v1.json",
+  "title": "EvidenceManifestRef",
+  "type": "object",
+  "required": ["schema_version", "tenant_id", "workflow_id", "objects", "manifest_digest", "created_at"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "tenant_id": { "type": "string", "format": "uuid" },
+    "workflow_id": { "type": "string", "format": "uuid" },
+    "manifest_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "media_type", "schema_version", "sha256_digest", "size_bytes", "producer", "provenance", "timestamp"],
+        "properties": {
+          "path": { "type": "string" },
+          "media_type": { "type": "string" },
+          "schema_version": { "type": "string" },
+          "sha256_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+          "size_bytes": { "type": "integer", "minimum": 0 },
+          "producer": { "type": "string" },
+          "provenance": { "type": "string", "enum": ["LIVE", "REPLAY", "DEMO", "INFERRED", "LOCAL"] },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

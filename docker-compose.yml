@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # Enterprise ERP Adapter MCP Server
+  enterprise-erp:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.enterprise-erp-adapter
+    ports:
+      - "9090:9090"
+    environment:
+      - SENTINEL_CONFIG=/app/config/enterprise-erp-adapter.toml
+      - RUST_LOG=info
+    volumes:
+      - ./docker/config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sentinel-network
+
+  # Control Plane API
+  control-plane:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.control-plane
+    ports:
+      - "8080:8080"
+    environment:
+      - SENTINEL_CONFIG=/app/config/control-plane.toml
+      - RUST_LOG=info
+    volumes:
+      - ./docker/config:/app/config:ro
+    depends_on:
+      enterprise-erp:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sentinel-network
+
+  # Workflow Worker
+  workflow-worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.workflow-worker
+    environment:
+      - SENTINEL_CONFIG=/app/config/workflow-worker.toml
+      - RUST_LOG=info
+    volumes:
+      - ./docker/config:/app/config:ro
+    depends_on:
+      control-plane:
+        condition: service_healthy
+      enterprise-erp:
+        condition: service_healthy
+    networks:
+      - sentinel-network
+
+  # Sentinel CLI (run as needed)
+  sentinelctl:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.sentinelctl
+    environment:
+      - SENTINEL_CONFIG=/app/config/sentinelctl.toml
+      - RUST_LOG=warn
+    volumes:
+      - ./docker/config:/app/config:ro
+      - ./demo:/app/demo:ro
+    networks:
+      - sentinel-network
+    entrypoint: ["sleep", "infinity"]
+
+  # Optional: Next.js Web Console
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://control-plane:8080
+    depends_on:
+      control-plane:
+        condition: service_healthy
+    networks:
+      - sentinel-network
+
+  # Optional: Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    ports:
+      - "16686:16686"
+      - "4317:4317"  # OTLP gRPC
+      - "4318:4318"  # OTLP HTTP
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - sentinel-network
+
+networks:
+  sentinel-network:
+    driver: bridge
+
+volumes:
+  sentinel-data:
