@@ -31,10 +31,10 @@
 
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Layer};
 
-use sentinel_domain::{LogFormat, ObservabilityConfig};
+use sentinel_config::{LogFormat, ObservabilityConfig};
 
 /// Configuration snapshot used by `init_telemetry`.
-pub use sentinel_domain::ObservabilityConfig as TelemetryConfig;
+pub use sentinel_config::ObservabilityConfig as TelemetryConfig;
 
 /// Guard that flushes the OpenTelemetry tracer provider on drop.
 ///
@@ -114,33 +114,30 @@ pub fn init_telemetry_with_name(
     // (yet) apply ratio-based sampling.
     let export_enabled = should_export(&config.otel_endpoint) && config.trace_sample_rate > 0.0;
 
-    let (registry_layer, provider) = if export_enabled {
+    let registry = tracing_subscriber::registry()
+        .with(env_filter)
+        .with(fmt_layer);
+
+    if export_enabled {
         match build_otlp_layer(service_name, &config.otel_endpoint, gcp_project) {
-            Ok((layer, provider)) => (Some(layer), Some(provider)),
+            Ok((layer, provider)) => {
+                guard.provider = Some(provider);
+                registry
+                    .with(layer)
+                    .try_init()
+                    .map_err(|e| format!("failed to set global tracing subscriber: {e}"))?;
+            }
             Err(e) => {
                 // Telemetry export failure must never block the primary request path.
                 eprintln!(
                     "WARN: OpenTelemetry Cloud Trace exporter disabled — falling back to \
                      stdout-only tracing. Reason: {e}"
                 );
-                (None, None)
+                registry
+                    .try_init()
+                    .map_err(|e| format!("failed to set global tracing subscriber: {e}"))?;
             }
         }
-    } else {
-        (None, None)
-    };
-
-    guard.provider = provider;
-
-    let registry = tracing_subscriber::registry()
-        .with(env_filter)
-        .with(fmt_layer);
-
-    if let Some(layer) = registry_layer {
-        registry
-            .with(layer)
-            .try_init()
-            .map_err(|e| format!("failed to set global tracing subscriber: {e}"))?;
     } else {
         registry
             .try_init()
@@ -151,17 +148,20 @@ pub fn init_telemetry_with_name(
 }
 
 /// Build the OpenTelemetry gRPC OTLP exporter + tracing layer for Cloud Trace.
-fn build_otlp_layer(
+fn build_otlp_layer<S>(
     service_name: &str,
     endpoint: &str,
     gcp_project: Option<&str>,
 ) -> Result<
     (
-        impl Layer<tracing_subscriber::Registry> + Send + Sync,
+        tracing_opentelemetry::OpenTelemetryLayer<S, opentelemetry_sdk::trace::Tracer>,
         opentelemetry_sdk::trace::TracerProvider,
     ),
     String,
-> {
+>
+where
+    S: tracing::Subscriber + for<'span> tracing_subscriber::registry::LookupSpan<'span>,
+{
     use opentelemetry::trace::TracerProvider as _;
     use opentelemetry::KeyValue;
     use opentelemetry_otlp::{Protocol, WithExportConfig};

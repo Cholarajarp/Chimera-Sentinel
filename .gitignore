@@ -120,3 +120,7 @@ update_manifest.py
 LICENSE.txt
 
 devpost_submission.md
+fix_*.js
+fix_*.py
+old_console.tsx
+infra/scripts/cargo-msvc.ps1

@@ -12,6 +12,7 @@ workspace = true
 
 [dependencies]
 sentinel-domain = { workspace = true }
+sentinel-config = { workspace = true }
 tracing.workspace = true
 tracing-subscriber.workspace = true
 # OpenTelemetry stack — non-optional so `cargo check --workspace` (CI) actually
