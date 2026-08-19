@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDashboard } from '../DashboardContext';
+import { SubmitCandidateModal } from '../SubmitCandidateModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
@@ -20,6 +21,7 @@ import {
 
 
 export function CandidateView(props: any) {
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const {
     activeTab, setActiveTab, experienceMode, setExperienceMode, workflowState, setWorkflowState,
     isRunningSim, setIsRunningSim, isTampered, setIsTampered, selectedCase, setSelectedCase,
@@ -50,6 +52,12 @@ export function CandidateView(props: any) {
                 </p>
               </div>
               <div className="btn-group">
+                {isLiveConnected && (
+                  <button onClick={() => setIsSubmitModalOpen(true)} className="btn btn-primary">
+                    <Cloud className="w-4 h-4 mr-2" />
+                    Register Agent
+                  </button>
+                )}
                 {selectedCandidate && (
                   <span className="provenance-tag provenance-live" title={selectedCandidate.revision_id}>
                     {shortDigest(selectedCandidate.revision_id)}
@@ -75,6 +83,10 @@ export function CandidateView(props: any) {
               <div className="panel corpus-placeholder">
                 <h3>No candidate revisions registered</h3>
                 <p>Register a candidate revision to inspect its Agent Bill of Materials.</p>
+                <button onClick={() => setIsSubmitModalOpen(true)} className="btn btn-primary mt-4 mx-auto">
+                  <Cloud className="w-4 h-4 mr-2" />
+                  Register Agent
+                </button>
               </div>
             )}
 
@@ -259,6 +271,12 @@ export function CandidateView(props: any) {
                 )}
               </div>
             )}
+            
+            <SubmitCandidateModal
+              isOpen={isSubmitModalOpen}
+              onClose={() => setIsSubmitModalOpen(false)}
+              onSuccess={() => window.location.reload()}
+            />
           </div>
     </>
   );
