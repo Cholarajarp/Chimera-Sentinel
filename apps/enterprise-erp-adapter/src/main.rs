@@ -663,7 +663,7 @@ async fn reset_fixture(state: &AppState, tenant_id: Uuid, workflow_id: Option<Uu
                     let should_delete = if let Some(wid) = workflow_id {
                         let wid_str = wid.to_string();
                         if col_name == "erp_idempotency" {
-                            if let Some(filename) = relative_path.split('/').last() {
+                            if let Some(filename) = relative_path.split('/').next_back() {
                                 filename.starts_with(&format!("{}_", wid_str))
                             } else {
                                 false

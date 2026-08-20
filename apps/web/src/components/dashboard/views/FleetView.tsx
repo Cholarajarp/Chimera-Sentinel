@@ -19,6 +19,9 @@ import {
 } from 'lucide-react';
 
 
+const API_BASE = '/api';
+const TENANT_ID = '00000000-0000-0000-0000-000000000001';
+
 export function FleetView(props: any) {
   const {
     activeTab, setActiveTab, experienceMode, setExperienceMode, workflowState, setWorkflowState,
@@ -341,7 +344,6 @@ export function FleetView(props: any) {
                             <button
                               onClick={async (e) => {
                                 e.stopPropagation();
-                                const TENANT_ID = '00000000-0000-0000-0000-000000000001';
                                 if (confirm(`Are you sure you want to delete workflow run ${workflow.workflow_id}?`)) {
                                   try {
                                     const res = await fetch(`/api/v1/workflows/${workflow.workflow_id}`, {
@@ -442,7 +444,6 @@ export function FleetView(props: any) {
                                 <button
                                   onClick={async (e) => {
                                     e.stopPropagation();
-                                    const TENANT_ID = '00000000-0000-0000-0000-000000000001';
                                     if (confirm(`Are you sure you want to delete candidate revision ${shortDigest(candidate.revision_id)}?`)) {
                                       try {
                                         const res = await fetch(`/api/v1/candidates/${candidate.revision_id}`, {
