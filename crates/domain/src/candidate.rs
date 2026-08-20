@@ -92,6 +92,8 @@ pub struct CandidateRevision {
     pub abom: AgentBillOfMaterials,
     pub policy_pack_id: PolicyPackId,
     pub corpus_version: String,
+    #[serde(default)]
+    pub vulnerabilities: Vec<Vulnerability>,
 }
 
 impl CandidateRevision {
@@ -108,6 +110,7 @@ impl CandidateRevision {
         abom: AgentBillOfMaterials,
         policy_pack_id: PolicyPackId,
         corpus_version: String,
+        vulnerabilities: Vec<Vulnerability>,
     ) -> Self {
         let revision_id = Self::compute_revision_id(&abom);
         Self {
@@ -117,6 +120,7 @@ impl CandidateRevision {
             abom,
             policy_pack_id,
             corpus_version,
+            vulnerabilities,
         }
     }
 }

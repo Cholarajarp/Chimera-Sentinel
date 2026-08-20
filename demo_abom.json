@@ -21,5 +21,25 @@
     "provenance": "LOCAL",
     "recorded_at": "2026-08-20T10:00:00Z",
     "risk_tier": "HIGH"
-  }
+  },
+  "vulnerabilities": [
+    {
+      "id": "CVE-2026-8801",
+      "title": "urllib3",
+      "severity": "CRITICAL",
+      "description": "Package=urllib3 installed=1.26.15 fixed=1.26.18 — Vulnerability in urllib3 allows remote attackers to cause a denial of service via a crafted request."
+    },
+    {
+      "id": "CVE-2026-4029",
+      "title": "cryptography",
+      "severity": "HIGH",
+      "description": "Package=cryptography installed=41.0.3 fixed=41.0.6 — Improper handling of PKCS#7 signatures allows signature verification bypass."
+    },
+    {
+      "id": "CVE-2026-3021",
+      "title": "transformers",
+      "severity": "MEDIUM",
+      "description": "Package=transformers installed=4.30.2 fixed=4.32.0 — Code execution vulnerability when loading untrusted model weights."
+    }
+  ]
 }

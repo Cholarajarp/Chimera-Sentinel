@@ -162,14 +162,8 @@ pub mod artifact_registry {
     use sentinel_domain::candidate::{ScanResponse, Vulnerability};
     use std::time::Duration;
 
-    /// Base URL of the On-Demand Scanning API.
-    const SCANNING_API_BASE: &str = "https://ondemandscanning.googleapis.com/v1";
-
-    /// Callable-state names returned by the On-Demand Scanning API. Only
-    /// `COMPLETED` is considered success; anything else is treated as not done
-    /// (during polling) or as a scan error (if terminal but not completed).
+    /// Callable-state name returned by the Container Analysis API.
     const STATE_COMPLETED: &str = "COMPLETED";
-    const STATE_FAILED: &str = "FAILED";
 
     /// A scan target: the image to scan and the GCP project/region that owns the
     /// On-Demand Scanning parent resource.
@@ -205,9 +199,8 @@ pub mod artifact_registry {
     /// fabricate an empty-but-clean result.
     pub async fn scan(target: &ScanTarget<'_>, access_token: &str) -> Result<ScanResponse, String> {
         let client = http_client()?;
-        let scan_name = create_scan(&client, target, access_token).await?;
-        wait_for_completion(&client, &scan_name, access_token).await?;
-        let occurrences = list_vulnerabilities(&client, &scan_name, access_token).await?;
+        let occurrences =
+            fetch_vulnerabilities_from_analysis(&client, target, access_token).await?;
         let vulnerabilities = occurrences
             .as_array()
             .map(|arr| arr.iter().map(vuln_from_occurrence).collect())
@@ -220,113 +213,26 @@ pub mod artifact_registry {
         })
     }
 
-    /// `POST /v1/projects/{p}/locations/{l}/scans` — kick off the on-demand scan.
-    /// Returns the scan's relative `name` (e.g.
-    /// `projects/…/locations/…/scans/scan-<uuid>`), used by the poll/list steps.
-    async fn create_scan(
+    async fn fetch_vulnerabilities_from_analysis(
         client: &reqwest::Client,
         target: &ScanTarget<'_>,
         access_token: &str,
-    ) -> Result<String, String> {
-        let url = format!(
-            "{SCANNING_API_BASE}/projects/{}/locations/{}/scans",
-            target.project, target.location
-        );
-        let response = client
-            .post(url)
-            .bearer_auth(access_token)
-            .json(&serde_json::json!({ "resourceUri": target.resource_uri }))
-            .send()
-            .await
-            .map_err(|e| format!("On-Demand scan create request failed: {e}"))?;
-
-        let status = response.status();
-        let body: serde_json::Value = response
-            .json()
-            .await
-            .map_err(|e| format!("On-Demand scan create returned invalid JSON ({status}): {e}"))?;
-        if !status.is_success() {
-            let reason = body
-                .get("error")
-                .and_then(|e| e.get("message"))
-                .and_then(|m| m.as_str())
-                .unwrap_or("unknown error");
-            return Err(format!(
-                "On-Demand scan create failed with HTTP {status}: {reason}"
-            ));
-        }
-
-        body.get("name")
-            .and_then(|n| n.as_str())
-            .map(str::to_string)
-            .ok_or_else(|| "On-Demand scan create response missing `name`".to_string())
-    }
-
-    /// Poll `GET /v1/{scan_name}` until the scan `state` reaches a terminal
-    /// state. Bounded by `MAX_POLLS * POLL_INTERVAL` to avoid wedging the
-    /// request on a slow/hung scan.
-    async fn wait_for_completion(
-        client: &reqwest::Client,
-        scan_name: &str,
-        access_token: &str,
-    ) -> Result<(), String> {
-        const MAX_POLLS: usize = 30;
-        const POLL_INTERVAL: Duration = Duration::from_secs(5);
-        let url = format!("{SCANNING_API_BASE}/{scan_name}");
-
-        for _ in 0..MAX_POLLS {
-            let response = client
-                .get(&url)
-                .bearer_auth(access_token)
-                .send()
-                .await
-                .map_err(|e| format!("On-Demand scan poll request failed: {e}"))?;
-            let status = response.status();
-            let body: serde_json::Value = response.json().await.map_err(|e| {
-                format!("On-Demand scan poll returned invalid JSON ({status}): {e}")
-            })?;
-            if !status.is_success() {
-                let reason = body
-                    .get("error")
-                    .and_then(|e| e.get("message"))
-                    .and_then(|m| m.as_str())
-                    .unwrap_or("unknown error");
-                return Err(format!(
-                    "On-Demand scan poll failed with HTTP {status}: {reason}"
-                ));
-            }
-            match body.get("state").and_then(|s| s.as_str()) {
-                Some(s) if s == STATE_COMPLETED => return Ok(()),
-                Some(s) if s == STATE_FAILED => {
-                    return Err(format!("On-Demand scan ended in FAILED state: {body:?}"));
-                }
-                _ => tokio::time::sleep(POLL_INTERVAL).await,
-            }
-        }
-        Err(format!(
-            "On-Demand scan for `{scan_name}` did not complete within {MAX_POLLS} polls"
-        ))
-    }
-
-    /// `GET /v1/{scan_name}:listVulnerabilities` — fetch the vulnerability
-    /// occurrences produced by a completed scan. Returns the raw `occurrences`
-    /// array (defensively extracted from either `occurrences` or the
-    /// `listVulnerabilitiesResponse` wrapper shape).
-    async fn list_vulnerabilities(
-        client: &reqwest::Client,
-        scan_name: &str,
-        access_token: &str,
     ) -> Result<serde_json::Value, String> {
-        let url = format!("{SCANNING_API_BASE}/{scan_name}:listVulnerabilities");
+        let url = format!(
+            "https://containeranalysis.googleapis.com/v1/projects/{}/occurrences",
+            target.project
+        );
         let response = client
             .get(&url)
             .bearer_auth(access_token)
+            .query(&[("filter", format!("resourceUri=\"{}\"", target.resource_uri))])
             .send()
             .await
-            .map_err(|e| format!("On-Demand scan listVulnerabilities request failed: {e}"))?;
+            .map_err(|e| format!("Container Analysis occurrences request failed: {e}"))?;
+
         let status = response.status();
         let body: serde_json::Value = response.json().await.map_err(|e| {
-            format!("On-Demand scan listVulnerabilities returned invalid JSON ({status}): {e}")
+            format!("Container Analysis occurrences returned invalid JSON ({status}): {e}")
         })?;
         if !status.is_success() {
             let reason = body
@@ -335,18 +241,12 @@ pub mod artifact_registry {
                 .and_then(|m| m.as_str())
                 .unwrap_or("unknown error");
             return Err(format!(
-                "On-Demand scan listVulnerabilities failed with HTTP {status}: {reason}"
+                "Container Analysis occurrences failed with HTTP {status}: {reason}"
             ));
         }
-        // The documented response shape carries `occurrences`; be tolerant.
         Ok(body
             .get("occurrences")
             .cloned()
-            .or_else(|| {
-                body.get("listVulnerabilitiesResponse")
-                    .and_then(|r| r.get("occurrences"))
-                    .cloned()
-            })
             .unwrap_or(serde_json::Value::Array(vec![])))
     }
 

@@ -56,6 +56,8 @@ pub mod candidate {
         pub abom: AgentBillOfMaterials,
         pub policy_pack_id: PolicyPackId,
         pub corpus_version: String,
+        #[serde(default)]
+        pub vulnerabilities: Vec<sentinel_domain::candidate::Vulnerability>,
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -73,6 +75,8 @@ pub mod candidate {
         pub corpus_version: String,
         #[serde(with = "time::serde::rfc3339")]
         pub created_at: OffsetDateTime,
+        #[serde(default)]
+        pub vulnerabilities: Vec<sentinel_domain::candidate::Vulnerability>,
     }
 
     impl From<CandidateRevision> for CandidateDetailResponse {
@@ -85,6 +89,7 @@ pub mod candidate {
                 policy_pack_id: c.policy_pack_id,
                 corpus_version: c.corpus_version,
                 created_at: OffsetDateTime::now_utc(),
+                vulnerabilities: c.vulnerabilities,
             }
         }
     }

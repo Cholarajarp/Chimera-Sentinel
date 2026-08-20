@@ -38,7 +38,7 @@ const TENANT_ID = '00000000-0000-0000-0000-000000000001';
 
 const CORPUS_PAGE_SIZE = 20;
 
-const MAX_POLL_ATTEMPTS = 90;
+const MAX_POLL_ATTEMPTS = 300; // 10 minutes polling timeout (300 attempts * 2 seconds)
 
 
 
@@ -794,7 +794,7 @@ export default function EnterpriseConsole() {
       const poll = async (): Promise<void> => {
         pollAttempts += 1;
         if (pollAttempts > MAX_POLL_ATTEMPTS) {
-          setApiError('Workflow has not progressed in 3 minutes. Check Cloud Run logs.');
+          setApiError('Workflow has not progressed in 10 minutes. Check Cloud Run logs.');
           setIsRunningSim(false);
           return;
         }
@@ -955,7 +955,7 @@ export default function EnterpriseConsole() {
       const poll = async (): Promise<void> => {
         pollAttempts += 1;
         if (pollAttempts > MAX_POLL_ATTEMPTS) {
-          setApiError('Attestation has not completed in 3 minutes. Check Cloud Run logs.');
+          setApiError('Attestation has not completed in 10 minutes. Check Cloud Run logs.');
           return;
         }
         try {

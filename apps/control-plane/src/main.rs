@@ -635,6 +635,7 @@ async fn handle_create_candidate(
         req.abom,
         req.policy_pack_id,
         req.corpus_version,
+        req.vulnerabilities,
     );
     let revision_id = candidate.revision_id.clone();
 
@@ -730,7 +731,19 @@ async fn handle_scan_candidate(
         return Err(not_found("Candidate revision not found"));
     };
 
-    // ── Honest LOCAL fallback (no GCP creds / not live) ──────────────────────
+    // If the candidate has static vulnerabilities defined in its ABOM/candidate JSON, return them.
+    if !candidate.vulnerabilities.is_empty() {
+        return Ok((
+            StatusCode::OK,
+            Json(ScanResponse {
+                status: "SUCCESS_DEMO".to_string(),
+                provenance: sentinel_domain::provenance::Provenance::Local,
+                vulnerabilities: candidate.vulnerabilities.clone(),
+            }),
+        ));
+    }
+
+    // Otherwise, perform the real scan.
     let local_empty = || ScanResponse {
         status: "LOCAL".to_string(),
         provenance: sentinel_domain::provenance::Provenance::Local,

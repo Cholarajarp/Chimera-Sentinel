@@ -113,6 +113,7 @@ pub fn test_candidate_revision(
         abom,
         PolicyPackId::new("ap-agent-v1"),
         "v1".to_string(),
+        Vec::new(),
     )
 }
 
