@@ -775,7 +775,16 @@ async fn handle_scan_candidate(
 
     let project = std::env::var("GOOGLE_CLOUD_PROJECT")
         .unwrap_or_else(|_| state.config.google_cloud.firestore_project.clone());
-    let location = std::env::var("GOOGLE_CLOUD_REGION").unwrap_or_else(|_| "us-east1".to_string());
+    let raw_location = std::env::var("GOOGLE_CLOUD_REGION").unwrap_or_else(|_| "us-east1".to_string());
+    let location = if raw_location.starts_with("us-") {
+        "us".to_string()
+    } else if raw_location.starts_with("europe-") {
+        "europe".to_string()
+    } else if raw_location.starts_with("asia-") {
+        "asia".to_string()
+    } else {
+        "us".to_string()
+    };
 
     let target = sentinel_google_adapters::artifact_registry::ScanTarget {
         project: &project,

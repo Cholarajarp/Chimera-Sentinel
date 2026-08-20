@@ -312,6 +312,10 @@ resource "google_cloud_run_v2_service" "control_plane" {
         name  = "SENTINEL_ALLOWED_ORIGIN"
         value = var.web_url_override
       }
+      env {
+        name  = "SENTINEL_SCAN_IMAGE"
+        value = "${var.region}-docker.pkg.dev/${var.project_id}/sentinel/control-plane:latest"
+      }
     }
 
     execution_environment = "EXECUTION_ENVIRONMENT_GEN2"
