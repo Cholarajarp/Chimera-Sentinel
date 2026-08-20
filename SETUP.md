@@ -29,7 +29,7 @@ Sentinel's primary input is an **Agent Bill of Materials (ABOM)** — a content-
 | `registry_resource` | Artifact Registry image path (e.g. `us-central1-docker.pkg.dev/project/repo/agent:sha`) |
 | `runtime_resource` | Agent Runtime resource name (e.g. `projects/p/locations/l/services/agent-rev`) |
 | `agent_identity` | IAM service account (e.g. `agent-v2@project.iam.gserviceaccount.com`) |
-| `model_ref` | Vertex AI model name (e.g. `gemini-2.5-flash-preview-05-20`) |
+| `model_ref` | Vertex AI model name (e.g. `gemini-3.5-flash`) |
 | `prompt_config_digest` | SHA-256 of the prompt configuration |
 | `tool_manifest_digest` | SHA-256 of the declared tool set |
 | `memory_config_digest` | SHA-256 of the Memory Bank configuration |
@@ -253,7 +253,7 @@ When the web console is deployed on Cloud Run, `API_URL` is already wired to the
 
 | Variable | Purpose |
 |---|---|
-| `GEMINI_MODEL_REF` | Vertex AI model (e.g. `gemini-2.5-flash-preview-05-20`) |
+| `GEMINI_MODEL_REF` | Vertex AI model (e.g. `gemini-3.5-flash`) |
 | `MODEL_ARMOR_TEMPLATE` | Full resource name of the Model Armor template |
 | `AGENT_GATEWAY_RESOURCE` | Full resource name of the Agent Gateway |
 | `MEMORY_BANK_RESOURCE` | RAG corpus resource name for Memory Bank |

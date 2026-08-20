@@ -1585,7 +1585,6 @@ version = "0.1.0"
 dependencies = [
  "figment",
  "sentinel-domain",
- "sentinel-observability",
  "serde",
  "tempfile",
  "thiserror 2.0.20",
@@ -1719,7 +1718,9 @@ dependencies = [
  "opentelemetry",
  "opentelemetry-otlp",
  "opentelemetry_sdk",
+ "sentinel-config",
  "sentinel-domain",
+ "serde_json",
  "tracing",
  "tracing-opentelemetry",
  "tracing-subscriber",

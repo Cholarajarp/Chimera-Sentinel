@@ -618,15 +618,15 @@ async def _run_adk_agent(
 
 async def _gemini_analyze_case(
     task: dict[str, Any],
-    model_ref: str,  # gemini-2.5-pro for deep / ambiguous case analysis
+    model_ref: str,  # gemini-3.1-pro-preview for deep / ambiguous case analysis
     project: str,
     region: str,
     token: str,
 ) -> dict[str, Any]:
-    """Direct Gemini 2.5 Pro call for deep case analysis.
+    """Direct Gemini 3.1 Pro Preview call for deep case analysis.
 
     Used for ambiguous cases or escalation when ADK agent result is inconclusive.
-    gemini-2.5-pro provides the deepest reasoning for edge-case policy decisions.
+    gemini-3.1-pro-preview provides the deepest reasoning for edge-case policy decisions.
     """
     # Use Vertex AI generateContent endpoint
     model_id = model_ref.replace("vertex-ai:", "").split("@")[0]

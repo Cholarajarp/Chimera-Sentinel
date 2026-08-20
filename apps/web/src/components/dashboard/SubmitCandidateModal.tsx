@@ -28,7 +28,7 @@ const DEFAULT_ABOM = `{
     "data_classification": ["CONFIDENTIAL", "PII"],
     "environment": "production",
     "owner": "engineer@chimera-sentinel.iam.gserviceaccount.com",
-    "risk_tier": "High"
+    "risk_tier": "HIGH"
   }
 }`;
 
