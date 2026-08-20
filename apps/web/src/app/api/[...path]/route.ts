@@ -73,6 +73,7 @@ async function proxyToRust(upstreamUrl: string, request: NextRequest): Promise<N
     // @ts-expect-error Node 18 fetch supports duplex for streaming bodies
     duplex: body ? 'half' : undefined,
     signal: AbortSignal.timeout(60_000),
+    cache: 'no-store',
   });
 
   // Stream the response back to the browser, preserving status and headers.
