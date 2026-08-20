@@ -29,6 +29,7 @@ const DEFAULT_ABOM = `{
     "environment": "production",
     "owner": "engineer@chimera-sentinel.iam.gserviceaccount.com",
     "provenance": "LOCAL",
+    "recorded_at": "2026-08-20T10:00:00Z",
     "risk_tier": "HIGH"
   }
 }`;
