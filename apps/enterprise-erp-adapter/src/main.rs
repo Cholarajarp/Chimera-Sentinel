@@ -636,9 +636,69 @@ async fn handle_reset_workflow_fixture(
 }
 
 async fn reset_fixture(state: &AppState, tenant_id: Uuid, workflow_id: Option<Uuid>) {
-    // For a real production app, deleting a workflow's data requires querying documents
-    // and deleting them one by one. In this fixture implementation, we'll just return.
-    // The previous in-memory implementation just deleted from HashMaps.
+    let token = match state.db.fetch_token().await {
+        Ok(t) => t,
+        Err(e) => {
+            error!("reset_fixture: failed to fetch token: {}", e);
+            return;
+        }
+    };
+
+    let col_names = [
+        "erp_invoice_drafts",
+        "erp_released_payments",
+        "erp_idempotency",
+    ];
+    for col_name in col_names {
+        let col_path = format!("tenants/{}/{}", tenant_id, col_name);
+        if let Ok(docs) = state.db.list_docs(&col_path, &token).await {
+            for doc in docs {
+                if let Some(name_str) = doc["name"].as_str() {
+                    let relative_path = if let Some(idx) = name_str.find("/documents/") {
+                        &name_str[idx + 11..]
+                    } else {
+                        name_str
+                    };
+
+                    let should_delete = if let Some(wid) = workflow_id {
+                        let wid_str = wid.to_string();
+                        if col_name == "erp_idempotency" {
+                            if let Some(filename) = relative_path.split('/').last() {
+                                filename.starts_with(&format!("{}_", wid_str))
+                            } else {
+                                false
+                            }
+                        } else if col_name == "erp_invoice_drafts" {
+                            if let Ok(draft) = from_firestore_doc::<InvoiceDraft>(&doc) {
+                                draft.workflow_id == Some(wid)
+                            } else {
+                                false
+                            }
+                        } else if col_name == "erp_released_payments" {
+                            if let Ok(payment) = from_firestore_doc::<ReleasedPayment>(&doc) {
+                                payment.workflow_id == Some(wid)
+                            } else {
+                                false
+                            }
+                        } else {
+                            false
+                        }
+                    } else {
+                        true
+                    };
+
+                    if should_delete {
+                        if let Err(e) = state.db.delete_doc(relative_path, &token).await {
+                            error!(
+                                "reset_fixture: failed to delete doc {}: {}",
+                                relative_path, e
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]

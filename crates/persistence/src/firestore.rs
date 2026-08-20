@@ -338,6 +338,25 @@ impl FirestoreStore {
         let docs = body["documents"].as_array().cloned().unwrap_or_default();
         Ok(docs)
     }
+
+    /// DELETE a document.
+    async fn delete_doc(&self, path: &str, token: &str) -> Result<(), String> {
+        let resp = self
+            .client
+            .delete(path)
+            .bearer_auth(token)
+            .send()
+            .await
+            .map_err(|e| format!("Firestore DELETE failed: {e}"))?;
+
+        match resp.status().as_u16() {
+            200 | 204 | 404 => Ok(()),
+            status => {
+                let body = resp.text().await.unwrap_or_default();
+                Err(format!("Firestore DELETE {path} returned {status}: {body}"))
+            }
+        }
+    }
 }
 
 // ─── CandidateRepository ──────────────────────────────────────────────────────
@@ -385,6 +404,14 @@ impl CandidateRepository for FirestoreStore {
         results.sort_by(|a, b| b.abom.recorded_at.cmp(&a.abom.recorded_at));
         results.truncate(limit);
         Ok(results)
+    }
+
+    async fn delete(&self, tenant_id: TenantId, revision_id: &RevisionId) -> Result<(), String> {
+        let token = fetch_access_token(&self.client).await?;
+        let path = self.doc_path(tenant_id, "candidates", &revision_id.0);
+        self.delete_doc(&path, &token).await?;
+        info!("FirestoreStore: deleted candidate {}", revision_id.0);
+        Ok(())
     }
 }
 
@@ -477,6 +504,14 @@ impl WorkflowRepository for FirestoreStore {
         results.sort_by(|a, b| b.created_at.cmp(&a.created_at));
         results.truncate(limit);
         Ok(results)
+    }
+
+    async fn delete(&self, tenant_id: TenantId, workflow_id: WorkflowId) -> Result<(), String> {
+        let token = fetch_access_token(&self.client).await?;
+        let path = self.doc_path(tenant_id, "workflows", &workflow_id.to_string());
+        self.delete_doc(&path, &token).await?;
+        info!("FirestoreStore: deleted workflow {}", workflow_id);
+        Ok(())
     }
 }
 

@@ -111,6 +111,12 @@ impl CandidateRepository for Store {
             Store::Firestore(s) => CandidateRepository::list(&**s, tenant_id, limit, cursor).await,
         }
     }
+    async fn delete(&self, tenant_id: TenantId, revision_id: &RevisionId) -> Result<(), String> {
+        match self {
+            Store::Memory(s) => CandidateRepository::delete(&**s, tenant_id, revision_id).await,
+            Store::Firestore(s) => CandidateRepository::delete(&**s, tenant_id, revision_id).await,
+        }
+    }
 }
 #[async_trait::async_trait]
 impl WorkflowRepository for Store {
@@ -152,6 +158,12 @@ impl WorkflowRepository for Store {
             Store::Firestore(s) => {
                 WorkflowRepository::list(&**s, tenant_id, state, limit, cursor).await
             }
+        }
+    }
+    async fn delete(&self, tenant_id: TenantId, workflow_id: WorkflowId) -> Result<(), String> {
+        match self {
+            Store::Memory(s) => WorkflowRepository::delete(&**s, tenant_id, workflow_id).await,
+            Store::Firestore(s) => WorkflowRepository::delete(&**s, tenant_id, workflow_id).await,
         }
     }
 }
@@ -398,7 +410,10 @@ async fn main() -> anyhow::Result<()> {
             "/v1/candidates",
             post(handle_create_candidate).get(handle_list_candidates),
         )
-        .route("/v1/candidates/:revision_id", get(handle_get_candidate))
+        .route(
+            "/v1/candidates/:revision_id",
+            get(handle_get_candidate).delete(handle_delete_candidate),
+        )
         // On-Demand vulnerability scanning for a candidate's container image.
         // Returns live CVEs (provenance: LIVE) when GCP creds are available, an
         // honest empty result (provenance: LOCAL) when they are not.
@@ -411,7 +426,10 @@ async fn main() -> anyhow::Result<()> {
             "/v1/workflows",
             post(handle_create_workflow).get(handle_list_workflows),
         )
-        .route("/v1/workflows/:workflow_id", get(handle_get_workflow))
+        .route(
+            "/v1/workflows/:workflow_id",
+            get(handle_get_workflow).delete(handle_delete_workflow),
+        )
         .route(
             "/v1/workflows/:workflow_id/dispatch",
             post(handle_dispatch_workflow),
@@ -664,6 +682,24 @@ async fn handle_get_candidate(
         Some(c) => Ok((StatusCode::OK, Json(CandidateDetailResponse::from(c)))),
         None => Err(not_found("Candidate revision not found")),
     }
+}
+
+async fn handle_delete_candidate(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(revision_id_str): Path<String>,
+) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+    let tenant_id = extract_tenant(&headers)?;
+    let rev_id = RevisionId(revision_id_str.to_string());
+
+    CandidateRepository::delete(&*state.store, tenant_id, &rev_id)
+        .await
+        .map_err(|e| internal(e))?;
+
+    Ok((
+        StatusCode::OK,
+        Json(serde_json::json!({ "status": "DELETED" })),
+    ))
 }
 
 /// `GET /v1/candidates/:revision_id/scan` — On-Demand vulnerability scan.
@@ -936,6 +972,33 @@ async fn handle_get_workflow(
         Some(w) => Ok((StatusCode::OK, Json(WorkflowResponse::from(w)))),
         None => Err(not_found("Workflow not found")),
     }
+}
+
+async fn handle_delete_workflow(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(wid_str): Path<String>,
+) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+    let tenant_id = extract_tenant(&headers)?;
+    let workflow_id = WorkflowId::parse(&wid_str).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(ErrorResponse::new(
+                400,
+                "Bad Request",
+                "Invalid workflow_id UUID",
+            )),
+        )
+    })?;
+
+    WorkflowRepository::delete(&*state.store, tenant_id, workflow_id)
+        .await
+        .map_err(|e| internal(e))?;
+
+    Ok((
+        StatusCode::OK,
+        Json(serde_json::json!({ "status": "DELETED" })),
+    ))
 }
 
 async fn handle_list_workflows(

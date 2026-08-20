@@ -21,16 +21,15 @@ use uuid::Uuid;
 use sentinel_attestation::{build_attestation_payload, sign_attestation};
 use sentinel_config::DatabaseConfig;
 use sentinel_domain::{
-    attestation::{AttestationMetadata, KeyReference},
+    attestation::AttestationMetadata,
     candidate::CandidateRevision,
     evidence::{Approval, CaseEvidence, EvidenceManifestRef},
     finding::{Finding, FindingKind, FindingSeverity, Remediation, RemediationAction},
     ids::{ApprovalId, CaseId, CaseRunId, RevisionId, TenantId, WorkflowId},
     ledger::{LedgerInvariants, LedgerSnapshot},
-    policy::GateDecision,
     provenance::Provenance,
     workflow::{Workflow, WorkflowCommand, WorkflowState, WorkflowSummary},
-    AuditEvent, AuditEventType,
+    AuditEvent,
 };
 use sentinel_evidence::{sha256_digest, EvidenceManifestBuilder};
 use sentinel_google_adapters::{gateway, model_armor};
@@ -79,6 +78,12 @@ impl CandidateRepository for Store {
             Store::Firestore(s) => CandidateRepository::list(&**s, tenant_id, limit, cursor).await,
         }
     }
+    async fn delete(&self, tenant_id: TenantId, revision_id: &RevisionId) -> Result<(), String> {
+        match self {
+            Store::Memory(s) => CandidateRepository::delete(&**s, tenant_id, revision_id).await,
+            Store::Firestore(s) => CandidateRepository::delete(&**s, tenant_id, revision_id).await,
+        }
+    }
 }
 #[async_trait::async_trait]
 impl WorkflowRepository for Store {
@@ -120,6 +125,12 @@ impl WorkflowRepository for Store {
             Store::Firestore(s) => {
                 WorkflowRepository::list(&**s, tenant_id, state, limit, cursor).await
             }
+        }
+    }
+    async fn delete(&self, tenant_id: TenantId, workflow_id: WorkflowId) -> Result<(), String> {
+        match self {
+            Store::Memory(s) => WorkflowRepository::delete(&**s, tenant_id, workflow_id).await,
+            Store::Firestore(s) => WorkflowRepository::delete(&**s, tenant_id, workflow_id).await,
         }
     }
 }
@@ -579,6 +590,119 @@ async fn fail_workflow(
     WorkflowRepository::update(&**store, workflow, expected_version).await
 }
 
+async fn execute_workflow_signing(
+    store: &Arc<Store>,
+    workflow: &mut sentinel_domain::workflow::Workflow,
+    google_config: &sentinel_config::GoogleCloudConfig,
+    worker_id: &str,
+) -> Result<(), String> {
+    use sentinel_domain::attestation::KeyReference;
+    use sentinel_domain::ids::PrincipalId;
+    use sentinel_domain::AuditEvent;
+    use sentinel_domain::AuditEventType;
+    use sentinel_domain::GateDecision;
+    use sentinel_domain::Provenance;
+    use sentinel_persistence::{AttestationRepository, AuditRepository, EvidenceRepository};
+
+    let now = OffsetDateTime::now_utc();
+    let tenant_id = workflow.tenant_id;
+    let candidate = CandidateRepository::get(&**store, tenant_id, &workflow.candidate_revision_id)
+        .await?
+        .ok_or_else(|| "Candidate revision not found".to_string())?;
+
+    let approval =
+        ApprovalRepository::get_for_workflow(&**store, tenant_id, workflow.workflow_id).await?;
+
+    let manifest = EvidenceRepository::get_manifest(&**store, tenant_id, workflow.workflow_id)
+        .await?
+        .ok_or_else(|| "Manifest missing".to_string())?;
+
+    let payload = build_attestation_payload(
+        tenant_id,
+        "production",
+        workflow.workflow_id,
+        &candidate,
+        workflow.policy_pack_id.clone(),
+        "1.0.0",
+        "sha256:pack-ap-v1-digest",
+        workflow.corpus_version.clone(),
+        "sha256:corpus-v1-digest",
+        "sha256:eval-all-passed",
+        manifest.manifest_digest.clone(),
+        vec!["draft_invoice_payment".to_string()],
+        approval.as_ref(),
+        GateDecision::Certifiable,
+        now,
+        time::Duration::days(90),
+        "sentinel-authority@project.iam.gserviceaccount.com",
+    );
+
+    let key_ref = KeyReference {
+        key_resource: google_config.kms_key_resource.clone(),
+        key_version: google_config.kms_key_version.clone(),
+        algorithm: "RSA_SIGN_PSS_2048_SHA256".to_string(),
+    };
+
+    let signed_attestation = sign_attestation(&payload, &key_ref, None).await?;
+    let payload_digest =
+        sha256_digest(&sentinel_evidence::canonicalize(&payload).map_err(|e| e.to_string())?);
+
+    ATTESTATION_OPERATIONS
+        .with_label_values(&["sign", "success"])
+        .inc();
+
+    AttestationRepository::store(&**store, workflow.workflow_id, &signed_attestation).await?;
+
+    let expected_version = workflow.version;
+    let from_state = workflow.state;
+    workflow
+        .apply(
+            WorkflowCommand::AttestationSigned {
+                attestation_digest: payload_digest,
+                signature: signed_attestation.signature.clone(),
+                key_version: "1".to_string(),
+            },
+            expected_version,
+            now,
+        )
+        .map_err(|e| e.to_string())?;
+    WorkflowRepository::update(&**store, workflow, expected_version).await?;
+
+    WORKFLOW_STATE_TRANSITIONS
+        .with_label_values(&[format!("{:?}", from_state).as_str(), "Certified", worker_id])
+        .inc();
+
+    ATTESTATION_OPERATIONS
+        .with_label_values(&["store", "success"])
+        .inc();
+
+    POLICY_DECISIONS.with_label_values(&["Certifiable"]).inc();
+
+    let event = AuditEvent {
+        event_id: Uuid::new_v4(),
+        tenant_id,
+        workflow_id: Some(workflow.workflow_id),
+        case_run_id: None,
+        event_type: AuditEventType::AttestationSigned,
+        actor: PrincipalId::new("sentinel-kms-signer"),
+        before_state: Some(WorkflowState::Attesting),
+        after_state: Some(WorkflowState::Certified),
+        command: None,
+        decision: Some(GateDecision::Certifiable),
+        explanation: Some(
+            "Candidate revision certified with valid KMS signed attestation".to_string(),
+        ),
+        provenance: Provenance::Live,
+        timestamp: now,
+        trace_id: None,
+        span_id: None,
+    };
+    AuditRepository::append(&**store, &event).await?;
+
+    info!("Workflow {} successfully CERTIFIED!", workflow.workflow_id);
+    Ok(())
+}
+
 async fn execute_workflow_certification(
     store: &Arc<Store>,
     workflow: &mut sentinel_domain::workflow::Workflow,
@@ -941,6 +1065,11 @@ async fn execute_workflow_certification_inner(
         "Workflow {} advanced to state {:?}",
         workflow.workflow_id, workflow.state
     );
+
+    if workflow.state == WorkflowState::Attesting {
+        execute_workflow_signing(store, workflow, google_config, worker_id).await?;
+    }
+
     Ok(())
 }
 
@@ -1049,7 +1178,7 @@ async fn execute_workflow_retest_inner(
     let candidate = CandidateRepository::get(&**store, tenant_id, &workflow.candidate_revision_id)
         .await?
         .ok_or_else(|| "Candidate not found".to_string())?;
-    let approval =
+    let _approval =
         ApprovalRepository::get_for_workflow(&**store, tenant_id, workflow.workflow_id).await?;
 
     let adk_url = std::env::var("SENTINEL_ADK_CERTIFIER_URL")
@@ -1140,99 +1269,6 @@ async fn execute_workflow_retest_inner(
         .with_label_values(&[format!("{:?}", from_state).as_str(), "Attesting", worker_id])
         .inc();
 
-    // Now in Attesting state: construct Attestation Payload and sign with KMS
-    let manifest = EvidenceRepository::get_manifest(&**store, tenant_id, workflow.workflow_id)
-        .await?
-        .ok_or_else(|| "Manifest missing".to_string())?;
-
-    let payload = build_attestation_payload(
-        tenant_id,
-        "production",
-        workflow.workflow_id,
-        &candidate,
-        workflow.policy_pack_id.clone(),
-        "1.0.0",
-        "sha256:pack-ap-v1-digest",
-        workflow.corpus_version.clone(),
-        "sha256:corpus-v1-digest",
-        "sha256:eval-all-passed",
-        manifest.manifest_digest.clone(),
-        vec!["draft_invoice_payment".to_string()],
-        approval.as_ref(),
-        GateDecision::Certifiable,
-        now,
-        time::Duration::days(90),
-        "sentinel-authority@project.iam.gserviceaccount.com",
-    );
-
-    let key_ref = KeyReference {
-        key_resource: google_config.kms_key_resource.clone(),
-        key_version: google_config.kms_key_version.clone(),
-        algorithm: "RSA_SIGN_PSS_2048_SHA256".to_string(),
-    };
-
-    let signed_attestation = sign_attestation(&payload, &key_ref, None).await?;
-    let payload_digest =
-        sha256_digest(&sentinel_evidence::canonicalize(&payload).map_err(|e| e.to_string())?);
-
-    // Record attestation operation metric
-    ATTESTATION_OPERATIONS
-        .with_label_values(&["sign", "success"])
-        .inc();
-
-    AttestationRepository::store(&**store, workflow.workflow_id, &signed_attestation).await?;
-
-    // Advance to Certified
-    let expected_version = workflow.version;
-    let from_state = workflow.state;
-    workflow
-        .apply(
-            WorkflowCommand::AttestationSigned {
-                attestation_digest: payload_digest,
-                signature: signed_attestation.signature.clone(),
-                key_version: "1".to_string(),
-            },
-            expected_version,
-            now,
-        )
-        .map_err(|e| e.to_string())?;
-    WorkflowRepository::update(&**store, workflow, expected_version).await?;
-
-    // Record state transition metric
-    WORKFLOW_STATE_TRANSITIONS
-        .with_label_values(&[format!("{:?}", from_state).as_str(), "Certified", worker_id])
-        .inc();
-
-    // Record attestation operation metric
-    ATTESTATION_OPERATIONS
-        .with_label_values(&["store", "success"])
-        .inc();
-
-    // Record policy decision metric
-    POLICY_DECISIONS.with_label_values(&["Certifiable"]).inc();
-
-    // Record audit event
-    let event = AuditEvent {
-        event_id: Uuid::new_v4(),
-        tenant_id,
-        workflow_id: Some(workflow.workflow_id),
-        case_run_id: None,
-        event_type: AuditEventType::AttestationSigned,
-        actor: sentinel_domain::ids::PrincipalId::new("sentinel-kms-signer"),
-        before_state: Some(WorkflowState::Attesting),
-        after_state: Some(WorkflowState::Certified),
-        command: None,
-        decision: Some(GateDecision::Certifiable),
-        explanation: Some(
-            "Candidate revision certified with valid KMS signed attestation".to_string(),
-        ),
-        provenance: Provenance::Live,
-        timestamp: now,
-        trace_id: None,
-        span_id: None,
-    };
-    AuditRepository::append(&**store, &event).await?;
-
-    info!("Workflow {} successfully CERTIFIED!", workflow.workflow_id);
+    execute_workflow_signing(store, workflow, google_config, worker_id).await?;
     Ok(())
 }

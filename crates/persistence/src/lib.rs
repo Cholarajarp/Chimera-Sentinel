@@ -41,6 +41,7 @@ pub trait CandidateRepository: Send + Sync {
         limit: usize,
         cursor: Option<String>,
     ) -> Result<Vec<CandidateRevision>, String>;
+    async fn delete(&self, tenant_id: TenantId, revision_id: &RevisionId) -> Result<(), String>;
 }
 
 #[async_trait]
@@ -59,6 +60,7 @@ pub trait WorkflowRepository: Send + Sync {
         limit: usize,
         cursor: Option<String>,
     ) -> Result<Vec<WorkflowSummary>, String>;
+    async fn delete(&self, tenant_id: TenantId, workflow_id: WorkflowId) -> Result<(), String>;
 }
 
 #[async_trait]
@@ -176,6 +178,16 @@ pub mod memory {
             results.truncate(limit);
             Ok(results)
         }
+
+        async fn delete(
+            &self,
+            tenant_id: TenantId,
+            revision_id: &RevisionId,
+        ) -> Result<(), String> {
+            let mut data = self.candidates.write().unwrap();
+            data.remove(&(tenant_id, revision_id.0.clone()));
+            Ok(())
+        }
     }
 
     #[async_trait]
@@ -226,6 +238,12 @@ pub mod memory {
             results.sort_by(|a, b| b.created_at.cmp(&a.created_at));
             results.truncate(limit);
             Ok(results)
+        }
+
+        async fn delete(&self, tenant_id: TenantId, workflow_id: WorkflowId) -> Result<(), String> {
+            let mut data = self.workflows.write().unwrap();
+            data.remove(&(tenant_id, workflow_id));
+            Ok(())
         }
     }
 

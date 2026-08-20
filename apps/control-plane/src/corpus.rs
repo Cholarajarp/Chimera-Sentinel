@@ -140,7 +140,14 @@ fn load_case(root: &Path, entry: &ManifestCaseEntry) -> Option<CorpusCase> {
     }
 
     // Manifest digests cover the raw file bytes.
-    let digest_verified = sha256_digest(&bytes) == entry.sha256;
+    let mut digest_verified = sha256_digest(&bytes) == entry.sha256;
+    if !digest_verified {
+        // Fallback for Windows CRLF line endings in git checkouts
+        let cleaned_bytes: Vec<u8> = bytes.iter().copied().filter(|&b| b != b'\r').collect();
+        if sha256_digest(&cleaned_bytes) == entry.sha256 {
+            digest_verified = true;
+        }
+    }
     if !digest_verified {
         warn!(
             "Corpus case {} digest mismatch: manifest={}",
