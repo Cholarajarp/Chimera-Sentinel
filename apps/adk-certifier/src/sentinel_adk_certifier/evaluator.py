@@ -24,6 +24,7 @@ from typing import Any
 
 import httpx
 from pydantic import BaseModel, Field
+from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 logger = logging.getLogger(__name__)
 
@@ -563,6 +564,11 @@ async def execute_case_live(
     )
 
 
+@retry(
+    stop=stop_after_attempt(5),
+    wait=wait_random_exponential(min=1, max=10),
+    reraise=True,
+)
 async def _run_adk_agent(
     task: dict[str, Any],
     gemini_model_ref: str,
@@ -664,6 +670,11 @@ async def _run_adk_agent(
     }
 
 
+@retry(
+    stop=stop_after_attempt(5),
+    wait=wait_random_exponential(min=1, max=10),
+    reraise=True,
+)
 async def _gemini_analyze_case(
     task: dict[str, Any],
     model_ref: str,  # gemini-3.1-pro-preview for deep / ambiguous case analysis
