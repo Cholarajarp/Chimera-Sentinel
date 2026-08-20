@@ -349,9 +349,29 @@ export default function EnterpriseConsole() {
     }
 
     setApiReachable(null);
-    fetch(`${API_BASE}/healthz`)
-      .then(r => setApiReachable(r.ok))
-      .catch(() => setApiReachable(false));
+    let isSubscribed = true;
+
+    const checkHealth = () => {
+      fetch(`${API_BASE}/healthz`)
+        .then(r => {
+          if (!isSubscribed) return;
+          if (r.ok) {
+            setApiReachable(true);
+          } else {
+            setTimeout(checkHealth, 2000);
+          }
+        })
+        .catch(() => {
+          if (!isSubscribed) return;
+          setTimeout(checkHealth, 2000);
+        });
+    };
+
+    checkHealth();
+
+    return () => {
+      isSubscribed = false;
+    };
   }, [experienceMode]);
 
   // Fleet posture, workflow history, and registered candidate ABOMs are all

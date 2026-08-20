@@ -133,7 +133,7 @@ export function FleetView(props: any) {
                       }}
                   >
                     Live Cloud
-                    <span>{apiReachable ? 'Control plane connected' : 'Requires API connection'}</span>
+                    <span>{apiReachable === true ? 'Control plane connected' : apiReachable === null ? 'Waking up backend...' : 'Requires API connection'}</span>
                   </button>
                   <button
                     type="button"
