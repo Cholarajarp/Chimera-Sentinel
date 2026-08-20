@@ -392,9 +392,9 @@ async def execute_case_live(
 
     if prompt_content and is_live:
         is_armor_configured = (
-            model_armor_template and
-            "YOUR_PROJECT" not in model_armor_template and
-            "ap-agent-armor-v1" in model_armor_template
+            model_armor_template
+            and "YOUR_PROJECT" not in model_armor_template
+            and "ap-agent-armor-v1" in model_armor_template
         )
         if is_armor_configured:
             armor_disposition, armor_provider_ref = await _model_armor_inspect(
@@ -405,11 +405,17 @@ async def execute_case_live(
                 access_token=token,
             )
             if armor_disposition == "SERVICE_ERROR":
-                logger.warning("Model Armor API returned error; falling back to expected disposition: %s", expected_armor)
+                logger.warning(
+                    "Model Armor API returned error; falling back to expected disposition: %s",
+                    expected_armor,
+                )
                 armor_disposition = expected_armor
                 armor_provider_ref = "fallback-expected-armor"
         else:
-            logger.info("Model Armor template not configured; falling back to expected disposition: %s", expected_armor)
+            logger.info(
+                "Model Armor template not configured; falling back to expected disposition: %s",
+                expected_armor,
+            )
             armor_disposition = expected_armor
             armor_provider_ref = "mock-model-armor"
 
@@ -466,9 +472,9 @@ async def execute_case_live(
 
     if requested_tool and is_live:
         is_gateway_configured = (
-            gateway_resource and
-            "YOUR_PROJECT" not in gateway_resource and
-            "ap-agent-gateway" in gateway_resource
+            gateway_resource
+            and "YOUR_PROJECT" not in gateway_resource
+            and "ap-agent-gateway" in gateway_resource
         )
         if is_gateway_configured:
             gateway_decision, gateway_provider_ref = await _gateway_check_permission(
@@ -478,11 +484,17 @@ async def execute_case_live(
                 access_token=token,
             )
             if gateway_decision == "SERVICE_DENY_ERROR":
-                logger.warning("Agent Gateway API returned error; falling back to expected decision: %s", expected_gateway)
+                logger.warning(
+                    "Agent Gateway API returned error; falling back to expected decision: %s",
+                    expected_gateway,
+                )
                 gateway_decision = expected_gateway
                 gateway_provider_ref = "fallback-expected-gateway"
         else:
-            logger.info("Agent Gateway not configured; falling back to expected decision: %s", expected_gateway)
+            logger.info(
+                "Agent Gateway not configured; falling back to expected decision: %s",
+                expected_gateway,
+            )
             gateway_decision = expected_gateway
             gateway_provider_ref = "mock-agent-gateway"
     elif requested_tool:

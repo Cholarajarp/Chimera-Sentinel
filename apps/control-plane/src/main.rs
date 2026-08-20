@@ -1420,10 +1420,8 @@ async fn handle_get_policy(
         ))
     })?;
 
-    let pack: serde_json::Value = serde_json::from_slice(&bytes).map_err(|e| {
-        internal(format!("Policy pack at {path} is not valid JSON: {e}"))
-    })?;
+    let pack: serde_json::Value = serde_json::from_slice(&bytes)
+        .map_err(|e| internal(format!("Policy pack at {path} is not valid JSON: {e}")))?;
 
     Ok((StatusCode::OK, Json(pack)))
 }
-
