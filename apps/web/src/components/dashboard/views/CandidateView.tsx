@@ -92,21 +92,44 @@ export function CandidateView(props: any) {
 
             {isLiveConnected && selectedCandidate && (
               <>
-                {candidates.length > 1 && (
-                  <div className="panel abom-selector">
-                    <label htmlFor="abom-revision-select">Revision</label>
-                    <select
-                      id="abom-revision-select"
-                      className="filter-select"
-                      value={selectedCandidate.revision_id}
-                      onChange={event => setSelectedRevisionId(event.target.value)}
+                {selectedCandidate && (
+                  <div className="panel abom-selector" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <label htmlFor="abom-revision-select" style={{ margin: 0 }}>Revision</label>
+                      <select
+                        id="abom-revision-select"
+                        className="filter-select"
+                        value={selectedCandidate.revision_id}
+                        onChange={event => setSelectedRevisionId(event.target.value)}
+                        style={{ minWidth: '300px' }}
+                      >
+                        {candidates.map(candidate => (
+                          <option key={candidate.revision_id} value={candidate.revision_id}>
+                            {candidate.agent_id} — {shortDigest(candidate.revision_id)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (confirm(`Are you sure you want to delete candidate revision ${shortDigest(selectedCandidate.revision_id)}?`)) {
+                          try {
+                            const res = await fetch(`${API_BASE}/v1/candidates/${selectedCandidate.revision_id}`, {
+                              method: 'DELETE',
+                              headers: { 'X-Tenant-ID': TENANT_ID }
+                            });
+                            if (!res.ok) throw new Error(await res.text());
+                            window.location.reload();
+                          } catch (e: any) {
+                            alert(`Failed to delete candidate: ${e.message}`);
+                          }
+                        }
+                      }}
+                      className="btn btn-danger"
+                      style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}
                     >
-                      {candidates.map(candidate => (
-                        <option key={candidate.revision_id} value={candidate.revision_id}>
-                          {candidate.agent_id} — {shortDigest(candidate.revision_id)}
-                        </option>
-                      ))}
-                    </select>
+                      Delete Revision
+                    </button>
                   </div>
                 )}
 

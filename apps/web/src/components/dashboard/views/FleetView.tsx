@@ -328,7 +328,7 @@ export function FleetView(props: any) {
                 </div>
                 <div className="table-wrapper">
                   <table className="sentinel-table">
-                    <thead><tr><th>Workflow</th><th>Candidate Revision</th><th>State</th><th>Decision</th><th>Updated</th></tr></thead>
+                    <thead><tr><th>Workflow</th><th>Candidate Revision</th><th>State</th><th>Decision</th><th>Updated</th><th>Action</th></tr></thead>
                     <tbody>
                       {liveWorkflows.length > 0 ? liveWorkflows.map(workflow => (
                         <tr key={workflow.workflow_id}>
@@ -337,8 +337,32 @@ export function FleetView(props: any) {
                           <td><span className="provenance-tag provenance-live">{workflow.state}</span></td>
                           <td>{workflow.gate_decision ?? 'Pending'}</td>
                           <td>{new Date(workflow.updated_at).toLocaleString()}</td>
+                          <td>
+                            <button
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                const TENANT_ID = '00000000-0000-0000-0000-000000000001';
+                                if (confirm(`Are you sure you want to delete workflow run ${workflow.workflow_id}?`)) {
+                                  try {
+                                    const res = await fetch(`/api/v1/workflows/${workflow.workflow_id}`, {
+                                      method: 'DELETE',
+                                      headers: { 'X-Tenant-ID': TENANT_ID }
+                                    });
+                                    if (!res.ok) throw new Error(await res.text());
+                                    window.location.reload();
+                                  } catch (err: any) {
+                                    alert(`Failed to delete workflow run: ${err.message}`);
+                                  }
+                                }
+                              }}
+                              className="btn btn-danger btn-inspect"
+                              style={{ padding: '0.2rem 0.5rem', minWidth: 'auto' }}
+                            >
+                              Delete
+                            </button>
+                          </td>
                         </tr>
-                      )) : <tr><td colSpan={5}>No workflows exist for this tenant yet.</td></tr>}
+                      )) : <tr><td colSpan={6}>No workflows exist for this tenant yet.</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -373,6 +397,7 @@ export function FleetView(props: any) {
                         <th>Risk tier</th>
                         <th>Admission status</th>
                         <th>Provenance</th>
+                        <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -413,12 +438,36 @@ export function FleetView(props: any) {
                               <td>
                                 <span className="provenance-tag provenance-live">{candidate.abom.provenance}</span>
                               </td>
+                              <td>
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    const TENANT_ID = '00000000-0000-0000-0000-000000000001';
+                                    if (confirm(`Are you sure you want to delete candidate revision ${shortDigest(candidate.revision_id)}?`)) {
+                                      try {
+                                        const res = await fetch(`/api/v1/candidates/${candidate.revision_id}`, {
+                                          method: 'DELETE',
+                                          headers: { 'X-Tenant-ID': TENANT_ID }
+                                        });
+                                        if (!res.ok) throw new Error(await res.text());
+                                        window.location.reload();
+                                      } catch (err: any) {
+                                        alert(`Failed to delete candidate revision: ${err.message}`);
+                                      }
+                                    }
+                                  }}
+                                  className="btn btn-danger btn-inspect"
+                                  style={{ padding: '0.2rem 0.5rem', minWidth: 'auto' }}
+                                >
+                                  Delete
+                                </button>
+                              </td>
                             </tr>
                           );
                         })
                       ) : (
                         <tr>
-                          <td colSpan={7}>No candidate revisions are registered for this tenant yet.</td>
+                          <td colSpan={8}>No candidate revisions are registered for this tenant yet.</td>
                         </tr>
                       )}
                     </tbody>
