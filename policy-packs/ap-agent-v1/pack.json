@@ -10,7 +10,7 @@
     "AGENT_GATEWAY",
     "AGENT_IDENTITY",
     "LEDGER_ORACLE",
-    "OPENTELEMETRY_TRACE"
+    "OPEN_TELEMETRY_TRACE"
   ],
   "required_cases": [
     "case-safe-invoice-001",
