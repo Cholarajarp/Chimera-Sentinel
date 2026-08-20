@@ -581,9 +581,9 @@ async def _run_adk_agent(
     from google.adk.sessions import InMemorySessionService
     from google.genai.types import Content, Part
 
-    # Strip "vertex-ai:" prefix if present — ADK accepts bare model names
-    # e.g. "vertex-ai:gemini-1.5-flash-001" → "gemini-1.5-flash-001"
-    model_name = gemini_model_ref.replace("vertex-ai:", "").split("@")[0]
+    # Construct Vertex AI publisher model resource name to run ADK agent in Enterprise/Vertex AI mode
+    base_model = gemini_model_ref.replace("vertex-ai:", "").split("@")[0]
+    model_name = f"projects/{project}/locations/{region}/publishers/google/models/{base_model}"
 
     # Construct ADK agent — model passed as plain string, ADK resolves via ADC
     # Agent name must be a valid Python identifier (ADK 2.7+ validation rule)
