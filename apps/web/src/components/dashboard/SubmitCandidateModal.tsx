@@ -54,7 +54,10 @@ export const SubmitCandidateModal: React.FC<SubmitCandidateModalProps> = ({ isOp
       
       const res = await fetch('/api/v1/candidates', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Tenant-ID': parsed.tenant_id || '00000000-0000-0000-0000-000000000001'
+        },
         body: JSON.stringify(parsed)
       });
 
