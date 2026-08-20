@@ -135,7 +135,7 @@ def create_app(settings: Settings) -> FastAPI:
                     )
             except Exception as exc:  # noqa: BLE001
                 # Individual case failure is recorded — never silently dropped
-                logger.error("Case %s failed: %s", case_id, exc)
+                logger.error("Case %s failed", case_id, exc_info=True)
                 raise HTTPException(
                     status_code=502,
                     detail=f"Case {case_id} execution failed: {exc}. Certification blocked.",
