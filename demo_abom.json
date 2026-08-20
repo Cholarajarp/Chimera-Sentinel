@@ -1,0 +1,23 @@
+{
+  "tenant_id": "00000000-0000-0000-0000-000000000001",
+  "agent_id": "demo-agent-v1",
+  "policy_pack_id": "ap-agent-v1",
+  "corpus_version": "v1.0.0",
+  "abom": {
+    "source_digest": "sha256:aabbccdd11223344556677889900aabbccdd11223344556677889900aabbccdd",
+    "registry_resource": "projects/chimera-sentinel/locations/us-east1/agents/demo-agent",
+    "runtime_resource": "projects/chimera-sentinel/locations/us-east1/agents/demo-agent/runtimes/default",
+    "agent_identity": "sa-demo@chimera-sentinel.iam.gserviceaccount.com",
+    "model_ref": "vertex-ai:gemini-3.5-flash@2026-08-01",
+    "prompt_config_digest": "sha256:001122334455667788990011223344556677889900112233445566778899001122",
+    "tool_manifest_digest": "sha256:334455667788990011223344556677889900112233445566778899001122334455",
+    "memory_config_digest": "sha256:556677889900112233445566778899001122334455667788990011223344556677",
+    "gateway_policy_digest": "sha256:667788990011223344556677889900112233445566778899001122334455667788",
+    "model_armor_config_digest": "sha256:99aabb001122334455667788990011223344556677889900112233445566778899",
+    "requested_capabilities": ["draft_invoice_payment", "get_payment_status", "lookup_vendor"],
+    "data_classification": ["CONFIDENTIAL", "PII"],
+    "environment": "production",
+    "owner": "engineer@chimera-sentinel.iam.gserviceaccount.com",
+    "risk_tier": "High"
+  }
+}
