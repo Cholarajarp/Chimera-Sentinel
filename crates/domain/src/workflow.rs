@@ -133,6 +133,7 @@ pub struct Workflow {
     pub created_at: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]
     pub updated_at: OffsetDateTime,
+    #[serde(default)]
     pub provider_refs: HashMap<String, String>,
 }
 
