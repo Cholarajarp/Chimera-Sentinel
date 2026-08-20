@@ -49,4 +49,4 @@ check_database = true
 check_google_services = false
 # enterprise-erp-adapter is a test fixture, not a production dependency.
 # Production readiness must not depend on it being up.
-check_mock_erp = false
+check_erp_adapter = false

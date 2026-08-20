@@ -187,6 +187,7 @@ impl Default for GoogleCloudConfig {
 
 /// Health check configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct HealthCheckConfig {
     pub check_database: bool,
     pub check_google_services: bool,

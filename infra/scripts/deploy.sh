@@ -136,6 +136,7 @@ echo "Rolling out new container images to Cloud Run..."
 gcloud run services update sentinel-web --image "${REPO}/web:${GIT_SHA}" --region="${REGION}" --project="${PROJECT_ID}" --quiet || true
 gcloud run services update sentinel-control-plane --image "${REPO}/control-plane:${GIT_SHA}" --region="${REGION}" --project="${PROJECT_ID}" --quiet || true
 gcloud run services update sentinel-mock-erp-mcp --image "${REPO}/enterprise-erp-adapter:${GIT_SHA}" --region="${REGION}" --project="${PROJECT_ID}" --quiet || true
+gcloud run jobs update sentinel-workflow-worker --image "${REPO}/workflow-worker:${GIT_SHA}" --region="${REGION}" --project="${PROJECT_ID}" --quiet || true
 
 cd ../..
 
