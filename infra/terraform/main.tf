@@ -256,7 +256,8 @@ resource "google_cloud_run_v2_service" "control_plane" {
       }
 
       resources {
-        limits = { cpu = "2", memory = "2Gi" }
+        limits   = { cpu = "1", memory = "512Mi" }
+        cpu_idle = true
       }
 
       env {
@@ -427,7 +428,8 @@ resource "google_cloud_run_v2_service" "adk_certifier" {
       }
 
       resources {
-        limits = { cpu = "2", memory = "4Gi" }
+        limits   = { cpu = "1", memory = "1Gi" }
+        cpu_idle = true
       }
 
       env {
@@ -511,7 +513,8 @@ resource "google_cloud_run_v2_service" "mock_erp" {
       }
 
       resources {
-        limits = { cpu = "1", memory = "1Gi" }
+        limits   = { cpu = "1", memory = "512Mi" }
+        cpu_idle = true
       }
 
       env {
@@ -561,7 +564,8 @@ resource "google_cloud_run_v2_service" "web" {
       }
 
       resources {
-        limits = { cpu = "1", memory = "1Gi" }
+        limits   = { cpu = "1", memory = "512Mi" }
+        cpu_idle = true
       }
 
       env {
