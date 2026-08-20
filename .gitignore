@@ -125,3 +125,11 @@ fix_*.js
 fix_*.py
 old_console.tsx
 infra/scripts/cargo-msvc.ps1
+
+# Temporary testing files, local configurations and secrets
+discovery_v1*.json
+scratch/
+secrets/
+*.secret
+gcp_key.json
+credential*.json
