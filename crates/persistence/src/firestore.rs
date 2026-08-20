@@ -174,6 +174,7 @@ fn from_firestore_doc<T: for<'de> Deserialize<'de>>(doc: &Value) -> Result<T, St
     let decoded: serde_json::Map<String, Value> = fields_obj
         .iter()
         .map(|(k, v)| (k.clone(), decode_value(v)))
+        .filter(|(_, v)| !v.is_null())
         .collect();
     serde_json::from_value(Value::Object(decoded))
         .map_err(|e| format!("Failed to deserialize Firestore document: {e}"))
