@@ -40,7 +40,7 @@ export const SubmitCandidateModal: React.FC<SubmitCandidateModalProps> = ({ isOp
         throw new Error('Invalid JSON format. Please check your syntax.');
       }
       
-      const res = await fetch('/api/candidates', {
+      const res = await fetch('/api/v1/candidates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(parsed)
