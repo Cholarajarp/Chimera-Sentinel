@@ -24,9 +24,9 @@ class Settings(BaseSettings):
     gemini_model_ref_agent: str = Field(
         default="gemini-3.5-flash", validation_alias="GEMINI_MODEL_REF_AGENT"
     )
-    # Deep analysis model — ambiguous / escalated case reasoning (Preview)
+    # Deep analysis model — ambiguous / escalated case reasoning (GA)
     gemini_model_ref_deep: str = Field(
-        default="gemini-3.1-pro-preview", validation_alias="GEMINI_MODEL_REF_DEEP"
+        default="gemini-3.5-flash", validation_alias="GEMINI_MODEL_REF_DEEP"
     )
 
     # Model Armor template resource name

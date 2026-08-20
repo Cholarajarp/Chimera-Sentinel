@@ -114,37 +114,52 @@ export function ApprovalView(props: any) {
             </section>
 
             <div className="grid gap-6 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))' }}>
-              {/* Capability diff */}
+              {/* Capability diff — derived from the real candidate ABOM */}
               <div className="panel p-7">
                 <h3 className="text-[17px] font-semibold mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-accent)' }}>
                   Proposed Least-Privilege Capability Diff
                 </h3>
                 <p className="text-[13px] mb-5" style={{ color: 'var(--text-secondary)' }}>
-                  Candidate requested excessive autonomy (<code>release_payment</code>). Sentinel policy mandates narrowing capability to drafting only.
+                  {selectedCandidate
+                    ? `${selectedCandidate.agent_id} requested ${selectedCandidate.abom.requested_capabilities.length} capabilities. Sentinel policy mandates removing elevated authority before release.`
+                    : 'Capability reduction is derived from the registered candidate ABOM. Register a candidate and start a run to see the real diff.'}
                 </p>
 
-                <div className="diff-container" style={{ margin: 0 }}>
-                  <div className="diff-box diff-box-before">
-                    <div className="font-bold text-[11px] tracking-widest uppercase mb-2" style={{ color: 'var(--accent-rose)' }}>
-                      Revoked Capability
+                {selectedCandidate ? (() => {
+                  const revoked = selectedCandidate.abom.requested_capabilities.filter(isElevatedCapability);
+                  const retained = selectedCandidate.abom.requested_capabilities.filter(c => !isElevatedCapability(c));
+                  return (
+                    <div className="diff-container" style={{ margin: 0 }}>
+                      <div className="diff-box diff-box-before">
+                        <div className="font-bold text-[11px] tracking-widest uppercase mb-2" style={{ color: 'var(--accent-rose)' }}>
+                          Revoked ({revoked.length})
+                        </div>
+                        {revoked.length > 0
+                          ? revoked.map(c => <span key={c} className="capability-pill-danger">{c}</span>)
+                          : <span className="text-[12px]" style={{ color: 'var(--text-muted)' }}>No elevated capabilities requested</span>}
+                      </div>
+                      <div className="diff-box diff-box-after">
+                        <div className="font-bold text-[11px] tracking-widest uppercase mb-2" style={{ color: 'var(--accent-emerald)' }}>
+                          Approved ({retained.length})
+                        </div>
+                        {retained.length > 0
+                          ? retained.map(c => <span key={c} className="capability-pill-success">{c}</span>)
+                          : <span className="text-[12px]" style={{ color: 'var(--text-muted)' }}>No safe capabilities remain</span>}
+                      </div>
                     </div>
-                    <span className="capability-pill-danger">release_payment</span>
-                    <p className="text-[12px] mt-2" style={{ color: 'var(--text-muted)' }}>
-                      Prohibits direct release of financial funds
-                    </p>
-                  </div>
-
-                  <div className="diff-box diff-box-after">
-                    <div className="font-bold text-[11px] tracking-widest uppercase mb-2" style={{ color: 'var(--accent-emerald)' }}>
-                      Approved Capabilities
+                  );
+                })() : (
+                  <div className="diff-container" style={{ margin: 0 }}>
+                    <div className="diff-box diff-box-before">
+                      <div className="font-bold text-[11px] tracking-widest uppercase mb-2" style={{ color: 'var(--accent-rose)' }}>Revoked</div>
+                      <span className="text-[12px]" style={{ color: 'var(--text-muted)' }}>Requires live candidate</span>
                     </div>
-                    <span className="capability-pill-success">draft_invoice_payment</span>
-                    <span className="capability-pill-success">get_payment_status</span>
-                    <p className="text-[12px] mt-2" style={{ color: 'var(--text-muted)' }}>
-                      Retains useful invoice drafting and status querying
-                    </p>
+                    <div className="diff-box diff-box-after">
+                      <div className="font-bold text-[11px] tracking-widest uppercase mb-2" style={{ color: 'var(--accent-emerald)' }}>Approved</div>
+                      <span className="text-[12px]" style={{ color: 'var(--text-muted)' }}>Requires live candidate</span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Reviewer credentials */}

@@ -84,13 +84,7 @@ export function SidebarNav({ activeTab, setActiveTab, handleExportReport }: Side
                   : "text-[#8b9cb8] hover:text-[#f1f5f9] hover:bg-[rgba(255,255,255,0.04)] border border-transparent"
               )}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="activeTabIndicator"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 bg-[#00e49b] rounded-r-full"
-                  style={{ boxShadow: '0 0 6px rgba(0,228,155,0.35)' }}
-                />
-              )}
+
               <Icon
                 size={14}
                 className={cn(

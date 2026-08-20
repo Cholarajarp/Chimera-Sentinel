@@ -102,7 +102,7 @@ variable "gemini_model_ref_agent" {
 variable "gemini_model_ref_deep" {
   description = "Deep analysis model — ambiguous / escalated case reasoning"
   type        = string
-  default     = "gemini-3.1-pro-preview" # Preview: highest reasoning capability
+  default     = "gemini-3.5-flash" # GA: using flash for deep analysis (Pro preview not needed)
 }
 
 variable "model_armor_template" {

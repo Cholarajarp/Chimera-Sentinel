@@ -442,6 +442,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/v1/attestations/verify", post(handle_verify_attestation))
         // Fleet posture
         .route("/v1/fleet/posture", get(handle_get_fleet_posture))
+        // Active policy pack for tenant
+        .route("/v1/policy", get(handle_get_policy))
         // Versioned evaluation corpus (digest-verified case definitions)
         .route("/v1/corpus", get(handle_get_corpus))
         .layer(middleware)
@@ -1398,3 +1400,30 @@ async fn handle_get_corpus(
 
     Ok((StatusCode::OK, Json(corpus.as_ref().clone())))
 }
+
+/// `GET /v1/policy` — returns the active policy pack loaded from disk.
+///
+/// Reads the policy pack from `SENTINEL_POLICY_PACK` (defaulting to
+/// `/app/policy-packs/ap-agent-v1/pack.json`) so the console displays
+/// the real rules rather than hardcoded HTML.
+async fn handle_get_policy(
+    headers: HeaderMap,
+) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+    let _tenant_id = extract_tenant(&headers)?;
+
+    let path = std::env::var("SENTINEL_POLICY_PACK")
+        .unwrap_or_else(|_| "/app/policy-packs/ap-agent-v1/pack.json".to_string());
+
+    let bytes = tokio::fs::read(&path).await.map_err(|e| {
+        service_unavailable(format!(
+            "Policy pack not found at {path}: {e}. Deploy with policy-packs/ap-agent-v1/."
+        ))
+    })?;
+
+    let pack: serde_json::Value = serde_json::from_slice(&bytes).map_err(|e| {
+        internal(format!("Policy pack at {path} is not valid JSON: {e}"))
+    })?;
+
+    Ok((StatusCode::OK, Json(pack)))
+}
+

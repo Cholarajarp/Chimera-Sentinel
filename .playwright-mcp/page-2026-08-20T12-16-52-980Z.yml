@@ -1,0 +1,694 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - banner:
+      - generic:
+        - generic [ref=e6]:
+          - text: menu
+          - link [ref=e8] [cursor=pointer]:
+            - /url: /
+            - img "Google Cloud Documentation" [ref=e10]
+          - generic [ref=e11]:
+            - navigation "Upper tabs" [ref=e14]:
+              - generic [ref=e15]:
+                - button "Dropdown menu for Extended Navigation" [ref=e16] [cursor=pointer]: arrow_drop_down More
+                - text: arrow_drop_down arrow_drop_down
+            - generic [ref=e20]:
+              - combobox "Search" [ref=e21]
+              - generic [ref=e26]: /
+          - link "display_settings Console" [ref=e27] [cursor=pointer]:
+            - /url: //console.cloud.google.com/
+          - generic [ref=e28]:
+            - button "Appearance:" [ref=e29] [cursor=pointer]: light_mode
+            - text: light_mode dark_mode brightness_medium
+          - generic "Select your language preference." [ref=e30]:
+            - button "Language" [ref=e31] [cursor=pointer]
+          - link "Sign in" [ref=e35] [cursor=pointer]:
+            - /url: https://docs.cloud.google.com/_d/signin?continue=https%3A%2F%2Fdocs.cloud.google.com%2Fgemini-enterprise-agent-platform%2Fmodels%2Fgoogle-models&prompt=select_account
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - generic [ref=e40]:
+              - link [ref=e41] [cursor=pointer]:
+                - /url: https://docs.cloud.google.com/gemini-enterprise-agent-platform
+              - list [ref=e44]:
+                - listitem [ref=e45]:
+                  - link "Gemini Enterprise Agent Platform" [ref=e46] [cursor=pointer]:
+                    - /url: https://docs.cloud.google.com/gemini-enterprise-agent-platform
+            - link "Start free" [ref=e48] [cursor=pointer]:
+              - /url: //console.cloud.google.com/freetrial
+          - navigation "Lower tabs" [ref=e51]:
+            - link "Overview" [ref=e53] [cursor=pointer]:
+              - /url: https://docs.cloud.google.com/gemini-enterprise-agent-platform
+            - link "Studio" [ref=e55] [cursor=pointer]:
+              - /url: https://docs.cloud.google.com/gemini-enterprise-agent-platform/agent-studio
+            - link "Agents" [ref=e57] [cursor=pointer]:
+              - /url: https://docs.cloud.google.com/gemini-enterprise-agent-platform/agents
+            - link "Models, selected" [ref=e59] [cursor=pointer]:
+              - /url: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models
+              - text: Models
+            - link "Notebooks" [ref=e61] [cursor=pointer]:
+              - /url: https://docs.cloud.google.com/gemini-enterprise-agent-platform/notebooks/overview
+            - button "arrow_drop_down Pricing" [ref=e63] [cursor=pointer]
+            - link "Engineering Blog" [ref=e65] [cursor=pointer]:
+              - /url: https://docs.cloud.google.com/gemini-enterprise-agent-platform/blog
+            - text: arrow_drop_down
+    - generic [ref=e67]:
+      - generic [ref=e68]:
+        - text: filter_list
+        - searchbox "Type to filter" [ref=e69]
+        - text: close
+      - navigation "Side menu" [ref=e70]:
+        - text: arrow_back
+        - generic [ref=e71]:
+          - text: arrow_forward arrow_forward arrow_forward
+          - list [ref=e73]:
+            - listitem [ref=e74]:
+              - link "Overview" [ref=e75] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models
+            - listitem [ref=e77]:
+              - link "Beginner's guide" [ref=e78] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models/beginners-guide
+            - listitem [ref=e80]:
+              - generic [ref=e81]: Get started
+            - listitem [ref=e83]:
+              - link "Get started with Agent Platform" [ref=e84] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models/start
+            - listitem [ref=e86]:
+              - generic [ref=e87]: Develop Gemini API code with the Gen AI SDK
+            - listitem [ref=e89]:
+              - link "Connect to the Knowledge MCP server" [ref=e90] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models/connect-to-the-knowledge-mcp-server
+            - listitem [ref=e92]:
+              - link "Get an API key" [ref=e93] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models/start/api-keys
+            - listitem [ref=e95]:
+              - link "Configure application default credentials" [ref=e96] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models/start/gcp-auth
+            - listitem [ref=e98]:
+              - link "Migrate from Google AI Studio to Agent Platform" [ref=e99] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models/migrate/migrate-google-ai
+            - listitem [ref=e101]:
+              - link "Get started with Gemini 3" [ref=e102] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models/start/get-started-with-gemini-3
+            - listitem [ref=e104]:
+              - link "Google GenAI libraries" [ref=e105] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models/start/libraries
+            - listitem [ref=e107]:
+              - link "Generative AI cookbook" [ref=e108] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models/cookbook
+            - listitem [ref=e110]:
+              - link "Access Gemini models using OpenAI libraries" [ref=e111] [cursor=pointer]:
+                - /url: /gemini-enterprise-agent-platform/models/start/openai
+            - listitem [ref=e113]:
+              - generic [ref=e114]:
+                - generic [ref=e115] [cursor=pointer]: arrow_drop_down
+                - button "Express mode" [ref=e116] [cursor=pointer]
+            - listitem [ref=e118]:
+              - generic [ref=e119]:
+                - generic [ref=e120] [cursor=pointer]: expand_less
+                - button "Select models" [ref=e121] [cursor=pointer]
+                - list [ref=e123]:
+                  - listitem [ref=e124]:
+                    - generic [ref=e125]: Model Garden
+                  - listitem [ref=e127]:
+                    - link "Overview of Model Garden" [ref=e128] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/model-garden/explore-models
+                  - listitem [ref=e130]:
+                    - link "Use models in Model Garden" [ref=e131] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/model-garden/use-models
+                  - listitem [ref=e133]:
+                    - link "Test model capabilities" [ref=e134] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/model-garden/quickstart
+                  - listitem [ref=e136]:
+                    - generic [ref=e137]: Google Models
+                  - listitem [ref=e139]:
+                    - link "All Google models" [ref=e140] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/google-models
+                  - listitem [ref=e142]:
+                    - generic [ref=e143]:
+                      - generic [ref=e144] [cursor=pointer]: arrow_drop_down
+                      - button "Gemini" [ref=e145] [cursor=pointer]
+                      - text: new_releases arrow_drop_down
+                  - listitem [ref=e147]:
+                    - generic [ref=e148]:
+                      - generic [ref=e149] [cursor=pointer]: arrow_drop_down
+                      - button "Veo" [ref=e150] [cursor=pointer]
+                      - text: not_interested not_interested
+                  - listitem [ref=e152]:
+                    - generic [ref=e153]:
+                      - generic [ref=e154] [cursor=pointer]: arrow_drop_down
+                      - button "Lyria" [ref=e155] [cursor=pointer]
+                  - listitem [ref=e157]:
+                    - link "Virtual Try-On" [ref=e158] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/vto/virtual-try-on-001
+                  - listitem [ref=e160]:
+                    - link "Model versions" [ref=e161] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/model-versions
+                  - listitem [ref=e163]:
+                    - generic [ref=e164]: Partner Models
+                  - listitem [ref=e166]:
+                    - link "Partner models overview" [ref=e167] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/partner-models/use-partner-models
+                  - listitem [ref=e169]:
+                    - generic [ref=e170]:
+                      - generic [ref=e171] [cursor=pointer]: arrow_drop_down
+                      - button "Claude" [ref=e172] [cursor=pointer]
+                  - listitem [ref=e174]:
+                    - generic [ref=e175]:
+                      - generic [ref=e176] [cursor=pointer]: arrow_drop_down
+                      - button "Grok" [ref=e177] [cursor=pointer]
+                      - text: not_interested
+                  - listitem [ref=e179]:
+                    - generic [ref=e180]:
+                      - generic [ref=e181] [cursor=pointer]: arrow_drop_down
+                      - button "Mistral AI" [ref=e182] [cursor=pointer]
+                  - listitem [ref=e184]:
+                    - link "Deploy partner models from Model Garden" [ref=e185] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/partner-models/deploy-partner-models
+                  - listitem [ref=e188]:
+                    - link "Partner model deprecations" [ref=e189] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/deprecations/partner-models
+                  - listitem [ref=e191]:
+                    - generic [ref=e192]: Open Models
+                  - listitem [ref=e194]:
+                    - link "Overview" [ref=e195] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/open-models/choose-serving-option
+                  - listitem [ref=e197]:
+                    - link "AlphaFold 3" [ref=e198] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/open-models/alphafold-3
+                  - listitem [ref=e200]:
+                    - link "AlphaGenome" [ref=e201] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/open-models/alphagenome
+                  - listitem [ref=e203]:
+                    - generic [ref=e204]:
+                      - generic [ref=e205] [cursor=pointer]: arrow_drop_down
+                      - button "DeepSeek" [ref=e206] [cursor=pointer]:
+                        - generic [ref=e208]: not_interested
+                  - listitem [ref=e209]:
+                    - generic [ref=e210]:
+                      - generic [ref=e211] [cursor=pointer]: arrow_drop_down
+                      - button "Embedding (e5)" [ref=e212] [cursor=pointer]:
+                        - generic [ref=e214]: not_interested
+                  - listitem [ref=e215]:
+                    - generic [ref=e216]:
+                      - generic [ref=e217] [cursor=pointer]: arrow_drop_down
+                      - button "Google Gemma" [ref=e218] [cursor=pointer]
+                  - listitem [ref=e220]:
+                    - generic [ref=e221]:
+                      - generic [ref=e222] [cursor=pointer]: arrow_drop_down
+                      - button "Kimi" [ref=e223] [cursor=pointer]:
+                        - generic [ref=e225]: not_interested
+                  - listitem [ref=e226]:
+                    - generic [ref=e227]:
+                      - generic [ref=e228] [cursor=pointer]: arrow_drop_down
+                      - button "Llama" [ref=e229] [cursor=pointer]
+                      - text: not_interested
+                  - listitem [ref=e231]:
+                    - generic [ref=e232]:
+                      - generic [ref=e233] [cursor=pointer]: arrow_drop_down
+                      - button "MiniMax" [ref=e234] [cursor=pointer]:
+                        - generic [ref=e236]: not_interested
+                  - listitem [ref=e237]:
+                    - generic [ref=e238]:
+                      - generic [ref=e239] [cursor=pointer]: arrow_drop_down
+                      - button "OpenAI" [ref=e240] [cursor=pointer]
+                      - text: not_interested
+                  - listitem [ref=e242]:
+                    - generic [ref=e243]:
+                      - generic [ref=e244] [cursor=pointer]: arrow_drop_down
+                      - button "Qwen" [ref=e245] [cursor=pointer]:
+                        - generic [ref=e247]: not_interested
+                  - listitem [ref=e248]:
+                    - generic [ref=e249]:
+                      - generic [ref=e250] [cursor=pointer]: arrow_drop_down
+                      - button "ZAI.org" [ref=e251] [cursor=pointer]:
+                        - generic [ref=e253]: not_interested
+                  - listitem [ref=e254]:
+                    - generic [ref=e255]:
+                      - generic [ref=e256] [cursor=pointer]: arrow_drop_down
+                      - button "Managed open models (MaaS)" [ref=e257] [cursor=pointer]
+                  - listitem [ref=e259]:
+                    - generic [ref=e260]:
+                      - generic [ref=e261] [cursor=pointer]: arrow_drop_down
+                      - button "Self-deployed open models" [ref=e262] [cursor=pointer]
+                      - text: arrow_drop_down arrow_drop_down
+            - listitem [ref=e264]:
+              - generic [ref=e265]:
+                - generic [ref=e266] [cursor=pointer]: expand_less
+                - button "Build" [ref=e267] [cursor=pointer]
+                - text: arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down verified_user arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down
+            - listitem [ref=e269]:
+              - generic [ref=e270]:
+                - generic [ref=e271] [cursor=pointer]: expand_less
+                - button "Evaluate" [ref=e272] [cursor=pointer]
+                - text: arrow_drop_down arrow_drop_down arrow_drop_down
+            - listitem [ref=e274]:
+              - generic [ref=e275]:
+                - generic [ref=e276] [cursor=pointer]: expand_less
+                - button "Deploy" [ref=e277] [cursor=pointer]
+                - text: arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down
+            - listitem [ref=e279]:
+              - generic [ref=e280]:
+                - generic [ref=e281] [cursor=pointer]: expand_less
+                - button "Administer" [ref=e282] [cursor=pointer]
+                - text: arrow_drop_down
+            - listitem [ref=e284]:
+              - generic [ref=e285]:
+                - generic [ref=e286] [cursor=pointer]: expand_less
+                - button "Build your own model" [ref=e287] [cursor=pointer]
+                - text: arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down open_in_new arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down not_interested arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down arrow_drop_down open_in_new
+    - button "Hide side navigation" [expanded] [ref=e289] [cursor=pointer]:
+      - generic [ref=e290]: chevron_left
+    - generic [ref=e291]:
+      - main [ref=e292]:
+        - generic [ref=e293]:
+          - article [ref=e294]:
+            - navigation [ref=e295]:
+              - list "Breadcrumb" [ref=e296]:
+                - listitem [ref=e297]:
+                  - link "Home" [ref=e298] [cursor=pointer]:
+                    - /url: https://docs.cloud.google.com/
+                - listitem [ref=e299]:
+                  - generic [ref=e300]: chevron_right
+                  - link "Documentation" [ref=e301] [cursor=pointer]:
+                    - /url: https://docs.cloud.google.com/docs
+                - listitem [ref=e302]:
+                  - generic [ref=e303]: chevron_right
+                  - link "AI and ML" [ref=e304] [cursor=pointer]:
+                    - /url: https://docs.cloud.google.com/docs/ai-ml
+                - listitem [ref=e305]:
+                  - generic [ref=e306]: chevron_right
+                  - link "Gemini Enterprise Agent Platform" [ref=e307] [cursor=pointer]:
+                    - /url: https://docs.cloud.google.com/gemini-enterprise-agent-platform
+                - listitem [ref=e308]:
+                  - generic [ref=e309]: chevron_right
+                  - link "Models" [ref=e310] [cursor=pointer]:
+                    - /url: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models
+            - button "Send feedback" [ref=e312] [cursor=pointer]
+            - heading [level=1] [ref=e313]:
+              - text: Google models
+              - generic [ref=e314]:
+                - listbox "Bookmark collections drop down" [ref=e317] [cursor=pointer]:
+                  - button "Open dropdown" [ref=e318]:
+                    - generic:
+                      - generic [ref=e319]: bookmark_border
+                      - text: bookmark
+                    - text: arrow_drop_down
+                - group "LLM Tools" [ref=e321]:
+                  - button "Copy page as markdown" [ref=e323] [cursor=pointer]:
+                    - generic [ref=e324]: content_copy
+                  - button "More LLM Tools options" [ref=e327] [cursor=pointer]: arrow_drop_down
+            - list [ref=e329]:
+              - listitem [ref=e330]:
+                - heading "On this page" [level=2] [ref=e331]
+                - button "expand_more" [ref=e333] [cursor=pointer]
+              - listitem [ref=e334]:
+                - link "Featured Gemini models" [ref=e335] [cursor=pointer]:
+                  - /url: "#gemini-models"
+              - listitem [ref=e337]:
+                - link "Generally available Gemini models" [ref=e338] [cursor=pointer]:
+                  - /url: "#generally-available-gemini-models"
+              - listitem [ref=e340]:
+                - link "Preview Gemini models" [ref=e341] [cursor=pointer]:
+                  - /url: "#preview-gemini-models"
+              - listitem [ref=e343]:
+                - link "Gemma models" [ref=e344] [cursor=pointer]:
+                  - /url: "#gemma_models"
+              - listitem [ref=e346]:
+                - link "Embeddings models" [ref=e347] [cursor=pointer]:
+                  - /url: "#embeddings-models"
+              - listitem [ref=e349]:
+                - button "more_horiz" [ref=e350] [cursor=pointer]
+            - generic [ref=e351]:
+              - paragraph
+              - heading [level=2] [ref=e352]:
+                - heading "Featured Gemini models" [level=2] [ref=e353]
+                - 'button "Copy link to this section: Featured Gemini models" [ref=e354] [cursor=pointer]': link
+              - generic [ref=e355]:
+                - generic [ref=e356]:
+                  - paragraph [ref=e357]: 3.7 Flash
+                  - paragraph [ref=e358]: Enhanced efficiency and practical reasoning, helping you build and iterate with greater ease
+                  - list [ref=e359]:
+                    - listitem [ref=e360]: Greater token efficiency
+                    - listitem [ref=e361]: More reliable code generation
+                    - listitem [ref=e362]: Stronger multimodal reasoning
+                  - link "Learn more about 3.7 Flash" [ref=e363] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-7-flash
+                - generic [ref=e364]:
+                  - paragraph [ref=e365]: 3.5 Flash-Lite
+                  - paragraph [ref=e366]: Our fast, budget-friendly way to power your everyday applications
+                  - list [ref=e367]:
+                    - listitem [ref=e368]: Optimized for low latency and high-volume traffic
+                    - listitem [ref=e369]: Capable tool orchestration
+                    - listitem [ref=e370]: Precise document understanding
+                  - link "Learn more about 3.5 Flash-Lite" [ref=e371] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite
+                - generic [ref=e372]:
+                  - paragraph [ref=e373]: 3.1 Flash Image 🍌
+                  - paragraph [ref=e374]: Turn ideas into production-ready assets
+                  - list [ref=e375]:
+                    - listitem [ref=e376]: Generate high-quality images
+                    - listitem [ref=e377]: Capable of turn-based conversational editing
+                    - listitem [ref=e378]: Capable of multi-image fusion and character consistency for advanced creative workflows
+                  - link "Learn more about 3.1 Flash Image" [ref=e379] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-1-flash-image
+              - heading "Generally available Gemini models" [level=2] [ref=e380]
+              - generic [ref=e381]:
+                - generic [ref=e382]:
+                  - generic [ref=e383]: spark
+                  - link "Gemini 3.7 Flash" [ref=e385] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-7-flash
+                  - generic [ref=e386]: Optimized for complex, multi-step workflows, improved code generation, and improved multimodal reasoning—all while using fewer tokens.
+                - generic [ref=e387]:
+                  - generic [ref=e388]: spark
+                  - link "Gemini 3.6 Flash" [ref=e390] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-6-flash
+                  - generic [ref=e391]: Optimized for complex, multi-step workflows, improved code generation, and improved multimodal reasoning—all while using fewer tokens.
+                - generic [ref=e392]:
+                  - generic [ref=e393]: performance_auto
+                  - link "Gemini 3.5 Flash-Lite" [ref=e395] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-5-flash-lite
+                  - generic [ref=e396]: Create lightweight agentic workflows at top speeds and minimal cost.
+                - generic [ref=e397]:
+                  - generic [ref=e398]: 🍌
+                  - link "Gemini 3.1 Flash-Lite Image (Nano Banana 2 Lite)" [ref=e400] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-1-flash-lite-image
+                  - generic [ref=e401]: Turn ideas into production-ready assets. Designed for high-volume and latency-sensitive workloads.
+                - generic [ref=e402]:
+                  - generic [ref=e403]: 🍌
+                  - link "Gemini 3.1 Flash Image" [ref=e405] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-1-flash-image
+                  - generic [ref=e406]: Turn ideas into production-ready assets. Features conversational editing, multi-image fusion, and character consistency for advanced creative workflows.
+                - generic [ref=e407]:
+                  - generic [ref=e408]: 🍌
+                  - link "Gemini 3 Pro Image" [ref=e410] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-pro-image
+                  - generic [ref=e411]: High-fidelity image generation with reasoning-enhanced composition. Supports legible text rendering, complex multi-turn editing, and character consistency using up to 14 reference inputs.
+                - generic [ref=e412]:
+                  - generic [ref=e413]: spark
+                  - link "Gemini 3.5 Flash" [ref=e415] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-5-flash
+                  - generic [ref=e416]: "Gemini 3.5 Flash delivers near-Pro intelligence at Flash-tier cost and speed: Pro-level coding proficiency, parallel agentic execution, all at the same price point as a Flash model."
+                - generic [ref=e417]:
+                  - generic [ref=e418]: performance_auto
+                  - link "Gemini 3.1 Flash-Lite" [ref=e420] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-1-flash-lite
+                  - generic [ref=e421]: Our most cost-efficient model, optimized for low latency use cases for high-volume, cost-sensitive LLM traffic.
+                - generic [ref=e422]:
+                  - generic [ref=e423]: diamond
+                  - link "Gemini 2.5 Pro" [ref=e425] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/2-5-pro
+                  - generic [ref=e426]: Our high-capability model for complex reasoning and coding. Features adaptive thinking capabilities to solve complex agentic and multimodal challenges with a 1 million token context.
+                - generic [ref=e427]:
+                  - generic [ref=e428]: spark
+                  - link "Gemini 2.5 Flash" [ref=e430] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/2-5-flash
+                  - generic [ref=e431]: Lightning-fast and highly capable. Delivers a balance of intelligence and latency with controllable thinking budgets for versatile applications.
+                - generic [ref=e432]:
+                  - generic [ref=e433]: 🍌
+                  - link "Gemini 2.5 Flash Image" [ref=e435] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/2-5-flash-image
+                  - generic [ref=e436]: Turn ideas into production-ready assets. Features conversational editing, multi-image fusion, and character consistency for advanced creative workflows.
+                - generic [ref=e437]:
+                  - generic [ref=e438]: performance_auto
+                  - link "Gemini 2.5 Flash-Lite" [ref=e440] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/2-5-flash-lite
+                  - generic [ref=e441]: Built for massive scale. Balances cost and performance for high-throughput tasks, optimized for efficiency without sacrificing multimodal understanding.
+                - generic [ref=e442]:
+                  - generic [ref=e443]: audio_spark
+                  - link "Gemini 2.5 Flash with Gemini Live API" [ref=e445] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/2-5-flash-live-api
+                  - generic [ref=e446]: Designed for real-time, bidirectional streaming. Features low-latency built-in audio and affective dialogue capabilities for natural, conversational interactions.
+              - heading "Preview Gemini models" [level=2] [ref=e447]
+              - generic [ref=e448]:
+                - generic [ref=e449]:
+                  - generic [ref=e450]: preview
+                  - link "Gemini Omni Flash" [ref=e452] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/omni-flash-preview
+                  - generic [ref=e453]: Generate video from text or reference assets, or edit existing videos.
+                - generic [ref=e454]:
+                  - generic [ref=e455]: preview
+                  - link "Gemini 3 Flash" [ref=e457] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-flash
+                  - generic [ref=e458]: Our best model for complex multimodal understanding, designed to tackle the most challenging agentic problems with strong coding and state-of-the-art reasoning capabilities.
+                - generic [ref=e459]:
+                  - generic [ref=e460]: preview
+                  - link "Gemini 3 Pro Image" [ref=e462] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/gemini/3-pro-image-preview
+                  - generic [ref=e463]: High-fidelity image generation with reasoning-enhanced composition. Supports legible text rendering, complex multi-turn editing, and character consistency using up to 14 reference inputs.
+              - heading "Gemma models" [level=2] [ref=e464]
+              - generic [ref=e465]:
+                - generic [ref=e466]:
+                  - link "Gemma 4" [ref=e470] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/agent-platform/publishers/google/model-garden/gemma4
+                  - generic [ref=e471]: An open model well-suited for tasks like text generation, coding, and reasoning, and supporting multimodal input (text and image for all variants, and additionally audio for the E2B and E4B variants).
+                - generic [ref=e472]:
+                  - link "Gemma 3n" [ref=e476] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/gemma3n
+                  - generic [ref=e477]: An open model designed for efficient execution on low-resource devices, supporting multimodal input (text, image, video, and audio) and text output in over 140 languages.
+                - generic [ref=e478]:
+                  - link "Gemma 3" [ref=e482] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/gemma3
+                  - generic [ref=e483]: An open model featuring text and image input, support for over 140 languages, and a 128K context window.
+                - generic [ref=e484]:
+                  - link "Gemma 2" [ref=e488] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/gemma2
+                  - generic [ref=e489]: An open model supporting text generation, summarization, and extraction.
+                - generic [ref=e490]:
+                  - link "Gemma" [ref=e494] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/335
+                  - generic [ref=e495]: A small, lightweight open model supporting text generation, summarization, and extraction.
+                - generic [ref=e496]:
+                  - link "ShieldGemma 2" [ref=e500] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/shieldgemma2
+                  - generic [ref=e501]: Instruction-tuned models for evaluating text and image safety against defined policies.
+                - generic [ref=e502]:
+                  - link "PaliGemma" [ref=e506] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/paligemma
+                  - generic [ref=e507]: An open vision-language model combining SigLIP and Gemma.
+                - generic [ref=e508]:
+                  - link "CodeGemma" [ref=e512] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/codegemma
+                  - generic [ref=e513]: A powerful, lightweight open model for coding tasks, including code completion, generation, and understanding.
+                - generic [ref=e514]:
+                  - link "TxGemma" [ref=e518] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/txgemma
+                  - generic [ref=e519]: A model that generates predictions, classifications, or text based on therapeutic-related data, for building AI models with less data and compute.
+                - generic [ref=e520]:
+                  - link "MedGemma" [ref=e524] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/medgemma
+                  - generic [ref=e525]: A collection of Gemma 3 variants trained for performance on medical text and image comprehension.
+                - generic [ref=e526]:
+                  - link "MedSigLIP" [ref=e530] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/medsiglip
+                  - generic [ref=e531]: A SigLIP variant trained to encode medical images and text into a common embedding space.
+                - generic [ref=e532]:
+                  - link "T5Gemma" [ref=e536] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/T5Gemma
+                  - generic [ref=e537]: A family of lightweight encoder-decoder research models.
+              - heading "Embeddings models" [level=2] [ref=e538]
+              - generic [ref=e539]:
+                - generic [ref=e540]:
+                  - generic [ref=e541]: width_normal
+                  - link "Embeddings for Text" [ref=e543] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/gemini-embedding-001
+                  - generic [ref=e544]: Converts text data into vector representations for semantic search, classification, and clustering.
+                - generic [ref=e545]:
+                  - generic [ref=e546]: width_normal
+                  - link "Multimodal Embeddings" [ref=e548] [cursor=pointer]:
+                    - /url: https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/multimodalembedding
+                  - generic [ref=e549]: Generates vectors based on images, for tasks such as image classification and search.
+              - heading "Veo models" [level=2] [ref=e550]
+              - generic [ref=e551]:
+                - generic [ref=e552]:
+                  - generic [ref=e553]: movie
+                  - link "Veo 2 Generate" [ref=e555] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/veo/2-0-generate#2.0-generate-001
+                  - generic [ref=e556]: Generates videos from text prompts and images.
+                - generic [ref=e557]:
+                  - generic [ref=e558]: movie
+                  - link "Veo 3 Generate" [ref=e560] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/veo/3-0-generate#3.0-generate-001
+                  - generic [ref=e561]: Generates videos from text prompts and images with high quality.
+                - generic [ref=e562]:
+                  - generic [ref=e563]: movie
+                  - link "Veo 3 Fast" [ref=e565] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/veo/3-0-generate#3.0-fast-generate-001
+                  - generic [ref=e566]: Generates videos from text prompts and images with high quality and low latency.
+                - generic [ref=e567]:
+                  - generic [ref=e568]: movie
+                  - link "Veo 3.1 Generate" [ref=e570] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-generate-001
+                  - generic [ref=e571]: Generates videos from text prompts and images with high quality.
+                - generic [ref=e572]:
+                  - generic [ref=e573]: movie
+                  - link "Veo 3.1 Fast" [ref=e575] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-fast-generate-001
+                  - generic [ref=e576]: Generates videos from text prompts and images with high quality and low latency.
+              - heading "Preview Veo models" [level=2] [ref=e577]
+              - generic [ref=e579]:
+                - generic [ref=e580]: movie
+                - link "Veo 3.1 Lite preview" [ref=e582] [cursor=pointer]:
+                  - /url: /gemini-enterprise-agent-platform/models/veo/3-1-generate#3.1-lite-generate-001
+                - generic [ref=e583]: Generates videos from text prompts and images with high quality and low cost.
+              - heading "Lyria models" [level=2] [ref=e584]
+              - generic [ref=e585]:
+                - generic [ref=e586]:
+                  - generic [ref=e587]: music_note_spark
+                  - generic [ref=e588]:
+                    - link "Lyria 3 Pro" [ref=e589] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/lyria/lyria-3#lyria-3-pro-preview
+                    - text: (
+                    - link "Preview" [ref=e590] [cursor=pointer]:
+                      - /url: https://cloud.google.com/products#product-launch-stages
+                    - text: )
+                  - generic [ref=e591]: Generates full-length music tracks from text and image prompts.
+                - generic [ref=e592]:
+                  - generic [ref=e593]: music_note_spark
+                  - generic [ref=e594]:
+                    - link "Lyria 3 Clip" [ref=e595] [cursor=pointer]:
+                      - /url: /gemini-enterprise-agent-platform/models/lyria/lyria-3#lyria-3-clip-preview
+                    - text: (
+                    - link "Preview" [ref=e596] [cursor=pointer]:
+                      - /url: https://cloud.google.com/products#product-launch-stages
+                    - text: )
+                  - generic [ref=e597]: Generates 30s audio clips from text and image prompts.
+                - generic [ref=e598]:
+                  - generic [ref=e599]: audio_spark
+                  - link "Lyria 2" [ref=e601] [cursor=pointer]:
+                    - /url: /gemini-enterprise-agent-platform/models/lyria/lyria-002
+                  - generic [ref=e602]: Generates music from text prompts.
+              - heading "Language support" [level=2] [ref=e603]
+              - button [ref=e606]:
+                - heading "add_circle Gemini" [level=3] [ref=e607]
+              - button [ref=e610]:
+                - heading "add_circle Gemma" [level=3] [ref=e611]
+              - button [ref=e614]:
+                - heading "add_circle Embeddings" [level=3] [ref=e615]
+              - heading "Explore all models in Model Garden" [level=2] [ref=e616]
+              - paragraph [ref=e617]: Model Garden is a platform that helps you discover, test, customize, and deploy Google proprietary and select OSS models and assets. To explore the generative AI models and APIs that are available on Gemini Enterprise Agent Platform, go to Model Garden in the Google Cloud console.
+              - paragraph [ref=e618]:
+                - link "Go to Model Garden" [ref=e619] [cursor=pointer]:
+                  - /url: https://console.cloud.google.com/agent-platform/model-garden
+              - paragraph [ref=e620]:
+                - text: To learn more about Model Garden, including available models and capabilities, see
+                - link "Explore AI models in Model Garden" [ref=e621] [cursor=pointer]:
+                  - /url: /gemini-enterprise-agent-platform/models/model-garden/explore-models
+                - text: .
+              - heading "Model versions" [level=2] [ref=e622]
+              - paragraph [ref=e623]:
+                - text: To see all model versions, including legacy and retired models, see
+                - link "Model versions and lifecycle" [ref=e624] [cursor=pointer]:
+                  - /url: /gemini-enterprise-agent-platform/models/model-versions
+                - text: .
+            - button "Send feedback" [ref=e626] [cursor=pointer]
+          - generic [ref=e627]:
+            - paragraph [ref=e628]:
+              - text: Except as otherwise noted, the content of this page is licensed under the
+              - link "Creative Commons Attribution 4.0 License" [ref=e629] [cursor=pointer]:
+                - /url: https://creativecommons.org/licenses/by/4.0/
+              - text: ", and code samples are licensed under the"
+              - link "Apache 2.0 License" [ref=e630] [cursor=pointer]:
+                - /url: https://www.apache.org/licenses/LICENSE-2.0
+              - text: . For details, see the
+              - link "Google Developers Site Policies" [ref=e631] [cursor=pointer]:
+                - /url: https://developers.google.com/site-policies
+              - text: . Java is a registered trademark of Oracle and/or its affiliates.
+            - paragraph [ref=e632]: Last updated 2026-08-19 UTC.
+      - navigation "Footer links" [ref=e635]:
+        - list [ref=e636]:
+          - listitem [ref=e637]:
+            - heading "Products and pricing" [level=3] [ref=e638]
+            - list [ref=e639]:
+              - listitem [ref=e640]:
+                - link "See all products" [ref=e641] [cursor=pointer]:
+                  - /url: //cloud.google.com/products/
+              - listitem [ref=e642]:
+                - link "Google Cloud pricing" [ref=e643] [cursor=pointer]:
+                  - /url: //cloud.google.com/pricing/
+              - listitem [ref=e644]:
+                - link "Google Cloud Marketplace" [ref=e645] [cursor=pointer]:
+                  - /url: //cloud.google.com/marketplace/
+              - listitem [ref=e646]:
+                - link "Contact sales" [ref=e647] [cursor=pointer]:
+                  - /url: //cloud.google.com/contact/
+          - listitem [ref=e648]:
+            - heading "Support" [level=3] [ref=e649]
+            - list [ref=e650]:
+              - listitem [ref=e651]:
+                - link "Community forums" [ref=e652] [cursor=pointer]:
+                  - /url: //discuss.google.dev/c/google-cloud/14/
+              - listitem [ref=e653]:
+                - link "Support" [ref=e654] [cursor=pointer]:
+                  - /url: //cloud.google.com/support-hub/
+              - listitem [ref=e655]:
+                - link "Release Notes" [ref=e656] [cursor=pointer]:
+                  - /url: //docs.cloud.google.com/release-notes
+              - listitem [ref=e657]:
+                - link "System status" [ref=e658] [cursor=pointer]:
+                  - /url: //status.cloud.google.com
+          - listitem [ref=e659]:
+            - heading "Resources" [level=3] [ref=e660]
+            - list [ref=e661]:
+              - listitem [ref=e662]:
+                - link "GitHub" [ref=e663] [cursor=pointer]:
+                  - /url: //github.com/googlecloudPlatform/
+              - listitem [ref=e664]:
+                - link "Getting Started with Google Cloud" [ref=e665] [cursor=pointer]:
+                  - /url: /docs/get-started/
+              - listitem [ref=e666]:
+                - link "Code samples" [ref=e667] [cursor=pointer]:
+                  - /url: /docs/samples
+              - listitem [ref=e668]:
+                - link "Cloud Architecture Center" [ref=e669] [cursor=pointer]:
+                  - /url: /architecture/
+              - listitem [ref=e670]:
+                - link "Training and Certification" [ref=e671] [cursor=pointer]:
+                  - /url: //cloud.google.com/learn/training/
+          - listitem [ref=e672]:
+            - heading "Engage" [level=3] [ref=e673]
+            - list [ref=e674]:
+              - listitem [ref=e675]:
+                - link "Blog" [ref=e676] [cursor=pointer]:
+                  - /url: //cloud.google.com/blog/
+              - listitem [ref=e677]:
+                - link "Events" [ref=e678] [cursor=pointer]:
+                  - /url: //cloud.google.com/events/
+              - listitem [ref=e679]:
+                - link "X (Twitter)" [ref=e680] [cursor=pointer]:
+                  - /url: //x.com/googlecloud
+              - listitem [ref=e681]:
+                - link "Google Cloud on YouTube" [ref=e682] [cursor=pointer]:
+                  - /url: //www.youtube.com/googlecloud
+              - listitem [ref=e683]:
+                - link "Google Cloud Tech on YouTube" [ref=e684] [cursor=pointer]:
+                  - /url: //www.youtube.com/googlecloudplatform
+      - navigation "Utility links" [ref=e687]:
+        - list [ref=e688]:
+          - listitem [ref=e689]:
+            - link "About Google" [ref=e690] [cursor=pointer]:
+              - /url: //about.google/
+          - listitem [ref=e691]:
+            - text: "|"
+            - link "Privacy" [ref=e692] [cursor=pointer]:
+              - /url: //policies.google.com/privacy
+          - listitem [ref=e693]:
+            - text: "|"
+            - link "Site terms" [ref=e694] [cursor=pointer]:
+              - /url: //policies.google.com/terms?hl=en
+          - listitem [ref=e695]:
+            - text: "|"
+            - link "Google Cloud terms" [ref=e696] [cursor=pointer]:
+              - /url: //cloud.google.com/product-terms
+          - text: "|"
+          - listitem [ref=e697]:
+            - text: "|"
+            - 'link "Our third decade of climate action: join us" [ref=e698] [cursor=pointer]':
+              - /url: //cloud.google.com/sustainability
+          - listitem [ref=e699]:
+            - generic [ref=e700]: Sign up for the Google Cloud newsletter
+            - link "Subscribe" [ref=e701] [cursor=pointer]:
+              - /url: //cloud.google.com/newsletter/
+        - generic "Select your language preference." [ref=e702]:
+          - button "Language" [ref=e703] [cursor=pointer]

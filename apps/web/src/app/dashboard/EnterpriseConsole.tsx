@@ -65,7 +65,13 @@ type WorkflowStep =
   | 'ApprovalRequired'
   | 'RetestRequired'
   | 'Attesting'
-  | 'Certified';
+  | 'Certified'
+  | 'Failed'
+  | 'Blocked'
+  | 'Rejected'
+  | 'Cancelled'
+  | 'Revoked'
+  | 'RecertificationRequired';
 
 type ExperienceMode = 'replay' | 'live';
 
@@ -245,6 +251,12 @@ const API_WORKFLOW_STATES: Record<string, WorkflowStep> = {
   RETEST_REQUIRED: 'RetestRequired',
   ATTESTING: 'Attesting',
   CERTIFIED: 'Certified',
+  FAILED: 'Failed',
+  BLOCKED: 'Blocked',
+  REJECTED: 'Rejected',
+  CANCELLED: 'Cancelled',
+  REVOKED: 'Revoked',
+  RECERTIFICATION_REQUIRED: 'RecertificationRequired',
 };
 
 function parseWorkflowState(state: string): WorkflowStep | null {
@@ -795,7 +807,15 @@ export default function EnterpriseConsole() {
           const state = parseWorkflowState(wf.state);
           if (!state) throw new Error(`Workflow entered unsupported state: ${wf.state}`);
           setWorkflowState(state);
-          if (state === 'ApprovalRequired' || state === 'Certified') {
+          if (
+            state === 'ApprovalRequired' ||
+            state === 'Certified' ||
+            state === 'Failed' ||
+            state === 'Blocked' ||
+            state === 'Rejected' ||
+            state === 'Cancelled' ||
+            state === 'Revoked'
+          ) {
             setIsRunningSim(false);
           } else {
             window.setTimeout(() => void poll(), 2000);
@@ -876,13 +896,17 @@ export default function EnterpriseConsole() {
       await new Promise(resolve => window.setTimeout(resolve, 650));
       setWorkflowState('Attesting');
       await new Promise(resolve => window.setTimeout(resolve, 650));
+      const replayRevisionId = selectedCandidate?.revision_id ?? 'not-registered';
+      const replayCapabilities = selectedCandidate
+        ? selectedCandidate.abom.requested_capabilities.filter(c => !isElevatedCapability(c))
+        : ['draft_invoice_payment', 'get_payment_status'];
       setAttestationData({
         schema_version: 'sentinel.attestation.v1',
-        provenance: 'guided-replay',
-        candidate_revision_id: 'sha256:d8a9f3e0984c1a7',
+        provenance: 'GUIDED_REPLAY',
+        candidate_revision_id: replayRevisionId,
         decision: 'CERTIFIED_WITH_CONSTRAINTS',
-        constrained_capabilities: ['draft_invoice_payment', 'get_payment_status'],
-        signer: 'projects/chimera-sentinel/locations/global/keyRings/sentinel/cryptoKeys/attestation-signer/cryptoKeyVersions/1',
+        constrained_capabilities: replayCapabilities,
+        note: 'This is a guided walkthrough envelope — not signed by Cloud KMS. Switch to Live Cloud for a real cryptographic attestation.',
       });
       setWorkflowState('Certified');
       return;
@@ -943,6 +967,15 @@ export default function EnterpriseConsole() {
           const state = parseWorkflowState(wf.state);
           if (!state) throw new Error(`Workflow entered unsupported state: ${wf.state}`);
           setWorkflowState(state);
+          if (
+            state === 'Failed' ||
+            state === 'Blocked' ||
+            state === 'Rejected' ||
+            state === 'Cancelled' ||
+            state === 'Revoked'
+          ) {
+            return; // Stop polling on failure
+          }
           if (state !== 'Certified') {
             window.setTimeout(() => void poll(), 2000);
             return;
