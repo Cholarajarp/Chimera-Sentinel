@@ -352,7 +352,7 @@ export default function EnterpriseConsole() {
     let isSubscribed = true;
 
     const checkHealth = () => {
-      fetch(`${API_BASE}/healthz`)
+      fetch(`${API_BASE}/v1/candidates?limit=1`, { headers: { 'X-Tenant-ID': TENANT_ID } })
         .then(r => {
           if (!isSubscribed) return;
           if (r.ok) {
