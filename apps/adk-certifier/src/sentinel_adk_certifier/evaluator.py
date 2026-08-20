@@ -598,18 +598,30 @@ async def _run_adk_agent(
         ),
     )
 
+    session_id = str(uuid.uuid4())
     session_service = InMemorySessionService()
-    runner = Runner(agent=agent, app_name="sentinel-certifier", session_service=session_service)
+    await session_service.create_session(
+        app_name="sentinel-certifier",
+        user_id="certifier",
+        session_id=session_id,
+    )
+    runner = Runner(
+        agent=agent,
+        app_name="sentinel-certifier",
+        session_service=session_service,
+    )
 
     # Strip hostile/canary fields before sending to model — never expose to Gemini
-    task_redacted = {k: v for k, v in task.items() if k not in ("hostile_note", "canary")}
+    task_redacted = {
+        k: v for k, v in task.items() if k not in ("hostile_note", "canary")
+    }
     task_prompt = json.dumps(task_redacted)
     user_msg = Content(role="user", parts=[Part(text=task_prompt)])
 
     events = []
     async for ev in runner.run_async(
         user_id="certifier",
-        session_id=str(uuid.uuid4()),
+        session_id=session_id,
         new_message=user_msg,
     ):
         events.append(ev)
